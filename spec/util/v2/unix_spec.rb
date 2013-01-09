@@ -34,7 +34,7 @@ module MCollective::Util
           File::Stat.expects(:new).returns(stat)
           File.expects(:read).with("puppetdlockfile").returns("1")
           Unix.expects(:disabled?).returns(false)
-          Unix.expects(:has_process_for_pid).with("1").returns(true)
+          Unix.expects(:has_process_for_pid?).with("1").returns(true)
           Unix.applying?.should == true
         end
 
@@ -50,12 +50,13 @@ module MCollective::Util
           File::Stat.expects(:new).returns(stat)
           File.expects(:read).with("puppetdlockfile").returns("1")
           Unix.expects(:disabled?).returns(false)
-          Unix.expects(:has_process_for_pid).with("1").returns(false)
+          Unix.expects(:has_process_for_pid?).with("1").returns(false)
           Unix.applying?.should == false
         end
 
         it "should return false on any error" do
           Unix.expects(:disabled?).raises("fail")
+          MCollective::Log.expects(:warn)
           Unix.applying?.should == false
         end
       end

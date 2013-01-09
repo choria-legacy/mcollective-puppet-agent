@@ -17,11 +17,12 @@ module MCollective
           return false if disabled?
 
           if File::Stat.new(Puppet[:puppetdlockfile]).size > 0
-            return has_process_for_pid(File.read(Puppet[:puppetdlockfile]))
+            return has_process_for_pid?(File.read(Puppet[:puppetdlockfile]))
           end
 
           return false
-        rescue
+        rescue => e
+          Log.warn("Could not determine if Puppet is applying a catalog: %s: %s: %s" % [e.backtrace.first, e.class, e.to_s])
           return false
         end
 

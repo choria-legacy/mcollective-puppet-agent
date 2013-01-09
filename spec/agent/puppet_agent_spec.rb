@@ -17,7 +17,7 @@ describe "puppet agent" do
       t = Time.now
       Time.expects(:now).returns(t)
 
-      msg = "Disabled via MCollective by unknown at %s local time" % t
+      msg = "Disabled via MCollective by unknown at %s" % t.strftime("%F %R")
 
       @manager.expects(:status).returns({:enabled => false})
       @manager.expects(:disable!).with(msg).returns(msg)
@@ -39,6 +39,15 @@ describe "puppet agent" do
 
     it "should fail with a friendly error message" do
       @manager.expects(:disable!).raises("rspec")
+      @manager.expects(:status).returns({:status=>"stopped",
+                                         :since_lastrun=>274639,
+                                         :lastrun=>1350376830,
+                                         :applying=>false,
+                                         :message=>"Currently stopped; last completed run 3 days 4 hours 17 minutes 19 seconds ago",
+                                         :enabled=>true,
+                                         :daemon_present=>false,
+                                         :disable_message=>"",
+                                         :idling => true})
       result = @agent.call(:disable)
       result.should be_aborted_error
       result[:statusmsg].should == "Could not disable Puppet: rspec"
@@ -56,6 +65,15 @@ describe "puppet agent" do
 
     it "should fail with a friendly error message" do
       @manager.expects(:enable!).raises("rspec")
+      @manager.expects(:status).returns({:status=>"stopped",
+                                         :since_lastrun=>274639,
+                                         :lastrun=>1350376830,
+                                         :applying=>false,
+                                         :message=>"Currently stopped; last completed run 3 days 4 hours 17 minutes 19 seconds ago",
+                                         :enabled=>true,
+                                         :daemon_present=>false,
+                                         :disable_message=>"",
+                                         :idling => true})
       result = @agent.call(:enable)
       result.should be_aborted_error
       result[:statusmsg].should == "Could not enable Puppet: rspec"
@@ -67,7 +85,11 @@ describe "puppet agent" do
       t = Time.now
       Time.expects(:now).returns(t)
 
-      summary = {"changes"=>{"total"=>1}, "events"=>{"success"=>1, "failure"=>0, "total"=>1}, "version"=>{"config"=>1350376829, "puppet"=>"3.0.0"}, "resources"=>{"failed_to_restart"=>0, "changed"=>1, "failed"=>0, "restarted"=>0, "scheduled"=>0, "out_of_sync"=>1, "skipped"=>6, "total"=>8}, "time"=>{"filebucket"=>0.000144, "last_run"=>1350376830, "config_retrieval"=>0.148587, "notify"=>0.001058, "total"=>0.149789}}
+      summary = {"changes"=>{"total"=>1},
+                 "events"=>{"success"=>1, "failure"=>0, "total"=>1},
+                 "version"=>{"config"=>1350376829, "puppet"=>"3.0.0"},
+                 "resources"=>{"failed_to_restart"=>0, "changed"=>1, "failed"=>0, "restarted"=>0, "scheduled"=>0, "out_of_sync"=>1, "skipped"=>6, "total"=>8},
+                 "time"=>{"filebucket"=>0.000144, "last_run"=>1350376830, "config_retrieval"=>0.148587, "notify"=>0.001058, "total"=>0.149789}}
 
       @manager.expects(:load_summary).returns(summary)
 
@@ -88,7 +110,14 @@ describe "puppet agent" do
 
   describe "#status" do
     it "should return the correct status" do
-      status = {:status=>"stopped", :since_lastrun=>97529, :lastrun=>1350376830, :applying=>false, :message=>"Currently stopped; last completed run 1 day 3 hours 5 minutes 29 seconds ago", :enabled=>true, :daemon_present=>false, :disable_message=>""}
+      status = {:status=>"stopped",
+                :since_lastrun=>97529,
+                :lastrun=>1350376830,
+                :applying=>false,
+                :message=>"Currently stopped; last completed run 1 day 3 hours 5 minutes 29 seconds ago",
+                :enabled=>true,
+                :daemon_present=>false,
+                :disable_message=>""}
 
       @manager.expects(:status).returns(status)
       result = @agent.call(:status)
@@ -101,6 +130,14 @@ describe "puppet agent" do
     before do
       @manager.stubs(:status).returns({})
       @manager.stubs(:signal_running_daemon)
+      @manager.stubs(:disabled?).returns(false)
+    end
+
+    it "should fail if the agent is currently disabled" do
+      @manager.expects(:disabled?).returns(true)
+      @manager.expects(:lock_message).returns("locked by rspec")
+      result = @agent.call(:runonce)
+      result.should have_data_items(:summary => "Puppet is disabled: 'locked by rspec'")
     end
 
     it "should not set splay options when force is given" do

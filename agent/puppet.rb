@@ -15,23 +15,24 @@ module MCollective
 
       action "disable" do
         begin
-          msg = @puppet_agent.disable!(request.fetch(:message, "Disabled via MCollective by %s at %s local time" % [request.caller, Time.now]))
+          msg = @puppet_agent.disable!(request.fetch(:message, "Disabled via MCollective by %s at %s" % [request.caller, Time.now.strftime("%F %R")]))
           reply[:status] = "Succesfully locked the Puppet agent: %s" % msg
-          reply[:enabled] = @puppet_agent.status[:enabled]
         rescue => e
-          reply.fail! "Could not disable Puppet: %s" % e.to_s
+          reply.fail(reply[:status] = "Could not disable Puppet: %s" % e.to_s)
         end
+
+        reply[:enabled] = @puppet_agent.status[:enabled]
       end
 
       action "enable" do
         begin
           @puppet_agent.enable!
-          reply[:enabled] = @puppet_agent.status[:enabled]
+          reply[:status] = "Succesfully enabled the Puppet agent"
         rescue => e
-          reply.fail! "Could not enable Puppet: %s" % e.to_s
+          reply.fail(reply[:status] = "Could not enable Puppet: %s" % e.to_s)
         end
 
-        reply[:status] = "Succesfully enabled the Puppet agent"
+        reply[:enabled] = @puppet_agent.status[:enabled]
       end
 
       action "last_run_summary" do
@@ -58,6 +59,16 @@ module MCollective
       action "runonce" do
         args = {}
 
+        if @puppet_agent.disabled?
+          message = @puppet_agent.lock_message
+
+          if message == ""
+            reply.fail!(reply[:summary] = "Puppet is disabled")
+          else
+            reply.fail!(reply[:summary] = "Puppet is disabled: '%s'" % message)
+          end
+        end
+
         args[:options_only] = true
         args[:noop] = request[:noop] if request.include?(:noop)
         args[:environment] = request[:environment] if request[:environment]
@@ -80,15 +91,24 @@ module MCollective
           end
         end
 
-        run_method, options = @puppet_agent.runonce!(args)
+        begin
+          run_method, options = @puppet_agent.runonce!(args)
+        rescue => e
+          reply.fail!(reply[:summary] = e.to_s)
+        end
+
         command = [@puppet_command].concat(options).join(" ")
 
         case run_method
           when :run_in_background
             Log.debug("Initiating a background puppet agent run using the command: %s" % command)
             exitcode = run(command, :stdout => :summary, :stderr => :summary, :chomp => true)
-            reply.fail!("Puppet command '%s' had exit code %d, expected 0" % [command, exitcode]) unless exitcode == 0
-            reply[:summary] = "Started a background Puppet run using the '%s' command" % command
+
+            unless exitcode == 0
+              reply.fail!(reply[:summary] = "Puppet command '%s' had exit code %d, expected 0" % [command, exitcode])
+            else
+              reply[:summary] = "Started a background Puppet run using the '%s' command" % command
+            end
 
           when :signal_running_daemon
             Log.debug("Signaling the running Puppet agent to start an immediate run")
@@ -96,8 +116,7 @@ module MCollective
             reply[:summary] = "Signalled the running Puppet Daemon"
 
           else
-            reply[:summary] = "Do not know how to do puppet runs using method %s" % run_method
-            reply.fail!(reply[:summary])
+            reply.fail!(reply[:summary] = "Do not know how to do puppet runs using method %s" % run_method)
         end
       end
     end

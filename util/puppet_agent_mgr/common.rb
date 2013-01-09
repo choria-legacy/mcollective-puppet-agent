@@ -150,6 +150,7 @@ module MCollective
                     :enabled => enabled?,
                     :daemon_present => daemon_present?,
                     :lastrun => lastrun,
+                    :idling => idling?,
                     :disable_message => lock_message,
                     :since_lastrun => (Time.now.to_i - lastrun)}
 
@@ -159,7 +160,7 @@ module MCollective
           elsif status[:applying]
             status[:status] = "applying a catalog"
 
-          elsif status[:daemon_present] && status[:applying]
+          elsif status[:idling]
             status[:status] = "idling"
 
           elsif !status[:applying]

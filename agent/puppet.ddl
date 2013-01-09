@@ -2,7 +2,7 @@ metadata :name => "puppet",
          :description => "Run Puppet agent, get its status, and enable/disable it",
          :author => "R.I.Pienaar <rip@devco.net>",
          :license => "ASL2.0",
-         :version => "1.0.0",
+         :version => "1.1.0",
          :url => "http://puppetlabs.com",
          :timeout => 5
 
@@ -114,6 +114,11 @@ action "status", :description => "Get the current status of the Puppet agent" do
            :display_as  => "Applying",
            :default     => false
 
+    output :idling,
+           :description => "Is the Puppet agent daemon running but not doing any work",
+           :display_as  => "Idling",
+           :default     => false
+
     output :enabled,
            :description => "Is the agent currently locked",
            :display_as  => "Enabled"
@@ -149,6 +154,7 @@ action "status", :description => "Get the current status of the Puppet agent" do
         aggregate boolean_summary(:daemon_present, {:true => "running", :false => "stopped"})
         aggregate summary(:applying)
         aggregate summary(:status)
+        aggregate summary(:idling)
     end
 end
 

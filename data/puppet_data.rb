@@ -10,7 +10,7 @@ module MCollective
         puppet_agent = Util::PuppetAgentMgr.manager
         status = puppet_agent.status
 
-        [:applying, :enabled, :daemon_present, :lastrun, :since_lastrun, :status, :disable_message].each do |item|
+        [:applying, :enabled, :daemon_present, :lastrun, :since_lastrun, :status, :disable_message, :idling].each do |item|
           result[item] = status[item]
         end
       end

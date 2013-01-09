@@ -23,7 +23,7 @@ To use this agent you need:
 
 # TODO
 
-  * Add an application plugin
+  * Add the runall command to the application
   * Add a new puppet commander
 
 ## Agent Installation
@@ -45,35 +45,35 @@ These are the defaults, adjust to taste
 
 Most basic case is just a run:
 
-    $ mco rpc puppet runonce
+    $ mco puppet runonce
 
 ...against a specific server and port:
 
-    $ mco rpc puppet runonce server=puppet.example.net:1234
+    $ mco puppet runonce --server puppet.example.net:1234
 
 ...just some tags
 
-    $ mco rpc puppet runonce tags=one,two,three
+    $ mco puppet runonce --tag one --tag two --tag three
 
 ...a noop run
 
-    $ mco rpc puppet runonce noop=true
+    $ mco puppet runonce --noop
 
 ...a actual run when noop is set in the config file
 
-    $ mco rpc puppet runonce noop=false
+    $ mco puppet runonce --no-noop
 
 ...in a specific environment
 
-    $ mco rpc puppet runonce environment=development
+    $ mco puppet runonce --environment development
 
 ...a splay run
 
-    $ mco rpc puppet runonce splay=true splaylimit=120
+    $ mco puppet runonce --splay --splaylimit 120
 
 ...or if you have splay on by default and do not want to splay
 
-    $ mco rpc puppet runonce splay=false
+    $ mco puppet runonce --no-splay
 
 These can all be combined to your liking
 
@@ -81,91 +81,58 @@ These can all be combined to your liking
 
 The status of the agent can be obtained:
 
-    $ mco rpc puppet status
-    Discovering hosts using the mc method for 2 second(s) .... 1
+    $ mco puppet status
 
-     * [ ============================================================> ] 1 / 1
+     * [ ============================================================> ] 2 / 2
 
-
-    dev1.example.net
-             Applying: false
-       Daemon Running: false
-         Lock Message:
-              Enabled: true
-             Last Run: 1348745262
-              message: Currently stopped; last completed run 2 hours 03 minutes 19 seconds ago
-              Summary: unknown
-       Since Last Run: 7399
-               Status: stopped
-
+       dev1.example.net: Currently stopped; last completed run 9 minutes 11 seconds ago
+       dev2.example.net: Currently stopped; last completed run 9 minutes 33 seconds ago
 
     Summary of Applying:
 
-      false = 1
+       false = 2
 
     Summary of Daemon Running:
 
-       running = 1
+       stopped = 2
 
     Summary of Enabled:
 
-       enabled = 1
+       enabled = 2
+
+    Summary of Idling:
+
+       false = 2
 
     Summary of Status:
 
-       stopped = 1
+       stopped = 2
 
-    Finished processing 1 / 1 hosts in 46.88 ms
+
+    Finished processing 2 / 2 hosts in 45.01 ms
 
 #### Requesting last run status
 
-    $ mco rpc puppet last_run_summary
-    Discovering hosts using the mc method for 2 second(s) .... 1
+    $ mco puppet summary
 
-     * [ ============================================================> ] 1 / 1
+     * [ ============================================================> ] 2 / 2
 
-
-    dev1.example.net
-           Changed Resources: 0
-       Config Retrieval Time: 0.040953
-              Config Version: 1348745261
-            Failed Resources: 0
-                    Last Run: 1348745262
-       Out of Sync Resources: 0
-              Since Last Run: 7477
-                     Summary: {"time"=>
-                                {"total"=>0.041138,
-                                 "config_retrieval"=>0.040953,
-                                 "filebucket"=>0.000185,
-                                 "last_run"=>1348745262},
-                               "changes"=>{"total"=>0},
-                               "resources"=>
-                                {"total"=>7,
-                                 "failed"=>0,
-                                 "changed"=>0,
-                                 "restarted"=>0,
-                                 "scheduled"=>0,
-                                 "failed_to_restart"=>0,
-                                 "skipped"=>6,
-                                 "out_of_sync"=>0},
-                               "version"=>{"config"=>1348745261, "puppet"=>"2.7.17"},
-                               "events"=>{"total"=>0, "success"=>0, "failure"=>0}}
-             Total Resources: 7
-                  Total Time: 0.041138
 
     Summary of Config Retrieval Time:
 
-       Average: 10.97
+       Average: 0.13
 
     Summary of Total Resources:
 
-       Average: 340
+       Average: 7
 
     Summary of Total Time:
 
-       Average: 24.74
+       Average: 0.13
 
-    Finished processing 1 / 1 hosts in 45.04 ms
+
+    Finished processing 2 / 2 hosts in 45.12 ms
+
 
 #### Enabling and disabling
 

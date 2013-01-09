@@ -50,4 +50,9 @@ dataquery :description => "Puppet Agent state" do
            :description => "Message supplied when agent was disabled",
            :display_as  => "Lock Message",
            :default     => ""
+
+    output :idling,
+           :description => "Is the Puppet agent daemon running but not doing any work",
+           :display_as  => "Idling",
+           :default     => false
 end

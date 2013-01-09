@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 ['puppet_agent_mgr', 'puppet_agent_mgr/v2/manager', 'puppet_agent_mgr/v3/manager'].each do |f|
-  require File.expand_path('%s/../../util/%s' % [File.dirname(__FILE__), f])
+  require File.expand_path('%s/../../../util/%s' % [File.dirname(__FILE__), f])
 end
 
 module MCollective::Util
@@ -241,11 +241,13 @@ module MCollective::Util
         Common.expects(:daemon_present?).returns(true)
         Common.expects(:lastrun).returns(lastrun).twice
         Common.expects(:lock_message).returns("locked")
+        Common.expects(:idling?).returns(true)
 
         Common.status.should == {:applying => true,
                                  :daemon_present => true,
                                  :disable_message => "locked",
                                  :enabled => true,
+                                 :idling => true,
                                  :lastrun => lastrun,
                                  :since_lastrun => 10,
                                  :message => "Currently applying a catalog; last completed run 10 seconds ago",
