@@ -34,9 +34,9 @@ Follow the basic [plugin install guide](http://projects.puppetlabs.com/projects/
 
 By default it just works but there are a few settings you can tweak in *server.cfg*:
 
-   plugin.puppet.command=puppet agent
-   plugin.puppet.splay=true
-   plugin.puppet.splaylimit=30
+    plugin.puppet.command=puppet agent
+    plugin.puppet.splay=true
+    plugin.puppet.splaylimit=30
 
 These are the defaults, adjust to taste
 
