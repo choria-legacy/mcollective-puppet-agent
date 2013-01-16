@@ -84,7 +84,11 @@ module MCollective
         client.reset
 
         begin
-          log("%s schedule status: %s" % [host, result[0][:data][:summary]])
+          if result[0][:statuscode] == 0
+            log("%s schedule status: %s" % [host, result[0][:data][:summary]])
+          else
+            log("%s schedule status: %s" % [host, result[0][:statusmsg]])
+          end
         rescue
           log("%s returned an unknown result: %s" % [host, result.inspect])
         end

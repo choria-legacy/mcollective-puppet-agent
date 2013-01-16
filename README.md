@@ -110,7 +110,7 @@ The status of the agent can be obtained:
 
     Finished processing 2 / 2 hosts in 45.01 ms
 
-#### Requesting last run status
+### Requesting last run status
 
     $ mco puppet summary
 
@@ -133,7 +133,7 @@ The status of the agent can be obtained:
     Finished processing 2 / 2 hosts in 45.12 ms
 
 
-#### Enabling and disabling
+### Enabling and disabling
 
 Puppet 3 supports a message when enabling and disableing
 
@@ -144,7 +144,7 @@ The message will be displayed when requesting agent status if it is disabled,
 when no message is supplied a default will be used that will include your
 mcollective caller identity and the time
 
-#### Running all enabled Puppet nodes
+### Running all enabled Puppet nodes
 
 Often after committing a change you want the change to be rolled out to your
 infrastructure as soon as possible within the performance constraints of your
@@ -185,7 +185,10 @@ checks if the amount of instances currently applying a catalog is less than the
 concurrency and then start as many machines as it can till it once again reaches
 the concurrency limit.
 
-#### Discovering based on agent status
+Note that you can pass flags like --noop and --no-noop but the splay settings will not work
+as the runall command does forced runs which negates splay.
+
+### Discovering based on agent status
 
 Two data plugins are provided, to see what data is available about the running
 agent do:
@@ -212,8 +215,6 @@ with Puppet disable can now be done easily:
 
     $ mco rpc service restart service=httpd -S "puppet().enabled=false"
 
-##### Discovery based on most recent run
-
 You can restart apache on all machine that has File[/srv/www] managed by Puppet:
 
     $ mco rpc service restart service=httpd -S "resource('file[/srv/wwww]').managed=true"
@@ -228,3 +229,30 @@ You can restart apache on all machine that has File[/srv/www] managed by Puppet:
 
 Other available data include config_retrieval_time, config_version, lastrun,
 out_of_sync_resources, since_lastrun, total_resources and total_time
+
+### Integration with the Action Policy Authorization plugin
+
+The Action Policy plugin supports querying the above data plugins to express
+Authorization rules.
+
+You can therefore use the enabled state of the Puppet Agent to limit access
+to other actions.
+
+The use case would be that you want:
+
+ * Only allow services to be stopped during maintenance periods when Puppet is disabled
+ * Only allow the site manager to disable Puppet
+
+You can control the service agent with the following policy using the *service.policy*
+file:
+
+    allow    cert=joe stop  puppet().enabled=false
+
+And you can then allow the manager user to disable and enable nodes using the
+*puppet.policy* file:
+
+    allow   cert=manager disable * *
+    allow   cert=manager enable  * *
+
+Together this allows you to ensure that you both have a maintenance window and a
+period where Puppet will not start services again without your knowledge
