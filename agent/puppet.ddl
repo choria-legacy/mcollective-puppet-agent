@@ -2,7 +2,7 @@ metadata :name => "puppet",
          :description => "Run Puppet agent, get its status, and enable/disable it",
          :author => "R.I.Pienaar <rip@devco.net>",
          :license => "ASL2.0",
-         :version => "1.1.0",
+         :version => "1.1.1",
          :url => "http://puppetlabs.com",
          :timeout => 5
 

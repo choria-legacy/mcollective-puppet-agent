@@ -12,6 +12,8 @@ The ACTION can be one of the following:
     count   - return a total count of running, enabled, and disabled nodes
     enable  - enable the Puppet Agent if it was previously disabled
     disable - disable the Puppet Agent preventing catalog from being applied
+    runall  - invoke a puppet run on matching nodes, making sure to only run
+              CONCURRENCY nodes at a time
     runonce - invoke a Puppet run on matching nodes
     status  - shows a short summary about each Puppet Agent status
     summary - shows resource and run time summaries
@@ -67,8 +69,10 @@ END_OF_USAGE
                 2 => "Please specify a command.",
                 3 => "Cannot set splay when forcing runs",
                 4 => "Cannot set splaylimit when forcing runs",
-                5 => "The runall command needs a concurrency count",
-                6 => "Do not know how to handle the '%s' command"}
+                5 => "The runall command needs a concurrency limit",
+                6 => "Do not know how to handle the '%s' command",
+                7 => "The concurrency for the runall command has to be greater than 0",
+                8 => "The runall command cannot be used with compound or -S filters on the CLI"}
 
     raise messages[message] % args
   end
@@ -101,7 +105,11 @@ END_OF_USAGE
     end
 
     if configuration[:command] == "runall"
-      raise_message(5) unless configuration[:concurrency]
+      if configuration[:concurrency]
+        raise_message(7) unless configuration[:concurrency] > 0
+      else
+        raise_message(5)
+      end
     end
 
     configuration[:noop] = false if configuration[:no_noop]
@@ -141,6 +149,34 @@ END_OF_USAGE
     end
   end
 
+  def runonce_arguments
+    arguments = {}
+
+    [:force, :server, :noop, :environment, :splay, :splaylimit].each do |arg|
+      arguments[arg] = configuration[arg] if configuration.include?(arg)
+    end
+
+    arguments[:tags] = Array(configuration[:tag]).join(",") if configuration.include?(:tag)
+
+    arguments
+  end
+
+  def runall_command(runner=nil)
+    raise_message(8) unless client.filter["compound"].empty?
+
+    unless runner
+      require 'mcollective/util/puppetrunner.rb'
+
+      runner = MCollective::Util::Puppetrunner.new(client, configuration)
+    end
+
+    runner.logger do |msg|
+      puts "%s: %s" % [Time.now.strftime("%F %T"), msg]
+    end
+
+    runner.runall
+  end
+
   def summary_command
     client.last_run_summary
 
@@ -178,15 +214,7 @@ END_OF_USAGE
   end
 
   def runonce_command
-    arguments = {}
-
-    [:force, :server, :noop, :environment, :splay, :splaylimit].each do |arg|
-      arguments[arg] = configuration[arg] if configuration.include?(arg)
-    end
-
-    arguments[:tags] = Array(configuration[:tag]).join(",") if configuration.include?(:tag)
-
-    printrpc client.runonce(arguments)
+    printrpc client.runonce(runonce_arguments)
 
     printrpcstats
 

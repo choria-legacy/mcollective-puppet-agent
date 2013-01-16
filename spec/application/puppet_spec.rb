@@ -78,6 +78,17 @@ module MCollective
           @app.expects(:raise_message).with(5)
           @app.validate_configuration(@app.configuration)
         end
+
+        it "should make sure the concurrency is > 0" do
+          @app.configuration[:command] = "runall"
+          @app.configuration[:concurrency] = 0
+
+          @app.expects(:raise_message).with(7)
+          @app.validate_configuration(@app.configuration)
+
+          @app.configuration[:concurrency] = 1
+          @app.validate_configuration(@app.configuration)
+        end
       end
 
       describe "#calculate_longest_hostname" do
@@ -104,6 +115,37 @@ module MCollective
 
         it "should not fail for empty results" do
           @app.display_results_single_field([], :message).should == false
+        end
+      end
+
+      describe "#runonce_arguments" do
+        it "should set the correct arguments" do
+          @app.configuration[:force] = true
+          @app.configuration[:server] = "rspec:123"
+          @app.configuration[:noop] = true
+          @app.configuration[:environment] = "rspec"
+          @app.configuration[:splay] = true
+          @app.configuration[:splaylimit] = 60
+          @app.configuration[:tag] = ["one", "two"]
+
+          @app.runonce_arguments.should == {:splaylimit=>60, :force=>true, :environment=>"rspec", :noop=>true, :server=>"rspec:123", :tags=>"one,two", :splay=>true}
+        end
+      end
+
+      describe "runall_command" do
+        it "should fail if a compound filter is set" do
+          @app.client.expects(:filter).returns({"compound" => [1]})
+          @app.expects(:raise_message).with(8).raises("rspec")
+          expect { @app.runall_command }.to raise_error("rspec")
+        end
+
+        it "should use the Puppetrunner to schedule runs" do
+          runner = mock
+          runner.expects(:logger)
+          runner.expects(:runall)
+
+          @app.client.expects(:filter).returns({"compound" => []})
+          @app.runall_command(runner)
         end
       end
 

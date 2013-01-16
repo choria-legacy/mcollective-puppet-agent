@@ -23,7 +23,6 @@ To use this agent you need:
 
 # TODO
 
-  * Add the runall command to the application
   * Add a new puppet commander
 
 ## Agent Installation
@@ -144,6 +143,47 @@ Puppet 3 supports a message when enabling and disableing
 The message will be displayed when requesting agent status if it is disabled,
 when no message is supplied a default will be used that will include your
 mcollective caller identity and the time
+
+#### Running all enabled Puppet nodes
+
+Often after committing a change you want the change to be rolled out to your
+infrastructure as soon as possible within the performance constraints of your
+infrastructure.
+
+The performance of a Puppet Master generally comes down to the maximum concurrent
+Puppet nodes that are applying a catalog it can sustain.
+
+Using the MCollective infrastructure we can determine how many machines are
+currently enabled and applying catalogs.
+
+Thus to do a Puppet run of your entire infrastructure keeping the concurrent
+Puppet runs as close as possible to 10 nodes at a time you would do:
+
+    $ mco puppet runall 10
+
+Below is the output from a run using a concurrency of 1 to highlight the output
+you might expect:
+
+    $ mco puppet runall 1
+    2013-01-16 16:14:26: Running all nodes with a concurrency of 1
+    2013-01-16 16:14:26: Discovering enabled Puppet nodes to manage
+    2013-01-16 16:14:29: Found 2 enabled nodes
+    2013-01-16 16:14:32: Currently 1 node applying the catalog; waiting for less than 1
+    2013-01-16 16:14:37: dev1.example.net schedule status: Started a background Puppet run using the 'puppet agent --onetime --daemonize --color=false' command
+    2013-01-16 16:14:40: Currently 1 node applying the catalog; waiting for less than 1
+    2013-01-16 16:14:44: Currently 1 node applying the catalog; waiting for less than 1
+    2013-01-16 16:14:48: Currently 1 node applying the catalog; waiting for less than 1
+    2013-01-16 16:14:52: Currently 1 node applying the catalog; waiting for less than 1
+    2013-01-16 16:14:56: Currently 1 node applying the catalog; waiting for less than 1
+    2013-01-16 16:15:00: Currently 1 node applying the catalog; waiting for less than 1
+    2013-01-16 16:15:04: Currently 1 node applying the catalog; waiting for less than 1
+    2013-01-16 16:15:08: Currently 1 node applying the catalog; waiting for less than 1
+    2013-01-16 16:15:13: dev2.example.net schedule status: Started a background Puppet run using the 'puppet agent --onetime --daemonize --color=false' command
+
+Here we can see it first finds all machine that are enabled and then periodically
+checks if the amount of instances currently applying a catalog is less than the
+concurrency and then start as many machines as it can till it once again reaches
+the concurrency limit.
 
 #### Discovering based on agent status
 
