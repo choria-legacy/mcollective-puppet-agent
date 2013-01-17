@@ -91,6 +91,16 @@ module MCollective
         end
       end
 
+      describe "#shorten_number" do
+        it "should shorten numbers correctly" do
+          @app.shorten_number("9999999").should == "10.0m"
+          @app.shorten_number("8999999").should == "9.0m"
+          @app.shorten_number("9000").should == "9.0k"
+          @app.shorten_number("9").should == "9.0"
+          @app.shorten_number("wat").should == "NaN"
+        end
+      end
+
       describe "#calculate_longest_hostname" do
         it "should calculate the correct size" do
           results = [{:sender => "a"}, {:sender => "abcdef"}, {:sender => "ab"}]
@@ -115,6 +125,29 @@ module MCollective
 
         it "should not fail for empty results" do
           @app.display_results_single_field([], :message).should == false
+        end
+      end
+
+      describe "#sparkline_for_field" do
+        it "should correctly extract and draw the data" do
+          results = []
+
+          (10...22).each do |c|
+            results << {:statuscode => 0, :data => {:rspec => c}}
+          end
+
+          @app.expects(:spark).with([2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0]).returns("rspec")
+          @app.sparkline_for_field(results, :rspec, 11).should == "rspec  min: 10.0   max: 21.0  "
+        end
+      end
+
+      describe "#spark" do
+        it "should correctly draw all zeros" do
+          @app.spark([0,0,0,0,0], ["0", "1", "2", "3"]).should == "00000"
+        end
+
+        it "should draw non zero for small numbers" do
+          @app.spark([1,0,0,0,100], ["0", "1", "2", "3"]).should == "10003"
         end
       end
 
@@ -151,9 +184,15 @@ module MCollective
 
       describe "#summary_command" do
         it "should gather the summaries and display it" do
-          @app.client.expects(:last_run_summary)
-          @app.expects(:printrpcstats).with(:summarize => true)
+          @app.client.expects(:progress=).with(false)
+          @app.client.expects(:last_run_summary).returns([])
           @app.expects(:halt)
+
+          [:total_resources, :out_of_sync_resources, :failed_resources, :changed_resources,
+           :config_retrieval_time, :total_time, :since_lastrun]. each do |field|
+              @app.expects(:sparkline_for_field).with([], field)
+           end
+
           @app.summary_command
         end
       end

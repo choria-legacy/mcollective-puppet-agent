@@ -1,3 +1,4 @@
+# encoding: utf-8
 class MCollective::Application::Puppet<MCollective::Application
   description "Schedule runs, enable, disable and interrogate the Puppet Agent"
 
@@ -76,6 +77,60 @@ END_OF_USAGE
 
     raise messages[message] % args
   end
+
+  def spark(histo, ticks=%w[▁ ▂ ▃ ▄ ▅ ▆ ▇])
+    range = histo.max - histo.min
+
+    if range == 0
+      return ticks.first * histo.size
+    end
+
+    scale = ticks.size - 1
+    distance = histo.max.to_f / scale
+
+    histo.map do |val|
+      tick = (val / distance).round
+      tick = 0 if tick < 0
+      tick = 1 if val > 0 && tick == 0 # show at least something for very small values
+
+      ticks[tick]
+    end.join
+  end
+
+  def shorten_number(number)
+    number = Float(number)
+    return "%0.1fm" % (number / 1000000) if number >= 1000000
+    return "%0.1fk" % (number / 1000) if number >= 1000
+    return "%0.1f" % number
+  rescue
+    "NaN"
+  end
+
+  def sparkline_for_field(results, field, bucket_count=20)
+    buckets = Array.new(bucket_count) { 0 }
+    values = []
+
+    results.each do |result|
+      if result[:statuscode] == 0
+        values << result[:data][field]
+      end
+    end
+
+    min = values.min
+    max = values.max
+
+    bucket_size = ((max - min) / Float(bucket_count)) + 1
+
+    unless max == min
+      values.each do |value|
+        bucket = Integer(((value - min) / bucket_size))
+        buckets[bucket] += 1
+      end
+    end
+
+    "%s  min: %-6s max: %-6s" % [spark(buckets), shorten_number(min), shorten_number(max)]
+  end
+
 
   def post_option_parser(configuration)
     if ARGV.length >= 1
@@ -178,11 +233,19 @@ END_OF_USAGE
   end
 
   def summary_command
-    client.last_run_summary
+    client.progress = false
+    results = client.last_run_summary
 
+    puts "Summary statistics for %d nodes:" % results.size
     puts
-
-    printrpcstats :summarize => true
+    puts "                  Total resources: %s" % sparkline_for_field(results, :total_resources)
+    puts "            Out Of Sync resources: %s" % sparkline_for_field(results, :out_of_sync_resources)
+    puts "                 Failed resources: %s" % sparkline_for_field(results, :failed_resources)
+    puts "                Changed resources: %s" % sparkline_for_field(results, :changed_resources)
+    puts "  Config Retrieval time (seconds): %s" % sparkline_for_field(results, :config_retrieval_time)
+    puts "         Total run-time (seconds): %s" % sparkline_for_field(results, :total_time)
+    puts "    Time since last run (seconds): %s" % sparkline_for_field(results, :since_lastrun)
+    puts
 
     halt client.stats
   end
