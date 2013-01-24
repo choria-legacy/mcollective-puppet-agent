@@ -112,26 +112,28 @@ The status of the agent can be obtained:
 
 ### Requesting last run status
 
+We can show a graph view of various metrics of the last Puppet run using the
+*mco puppet summary* command.
+
     $ mco puppet summary
 
-     * [ ============================================================> ] 2 / 2
+    Summary statistics for 28 nodes:
 
+                      Total resources: ▂▇▂▁▁▃▁▂▂▂▄▁▂▁▁▁▁▁▂▁  min: 332.0  max: 695.0
+                Out Of Sync resources: ▇▂▁▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁  min: 0.0    max: 6.0
+                     Failed resources: ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁  min: 0.0    max: 0.0
+                    Changed resources: ▇▂▁▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁  min: 0.0    max: 6.0
+      Config Retrieval time (seconds): ▆▇▂▄▁▂▁▄▁▂▃▃▁▁▂▁▁▁▁▁  min: 3.0    max: 53.4
+             Total run-time (seconds): ▇▄▂▁▄▄▂▃▁▁▁▂▂▁▁▄▂▁▁▁  min: 6.9    max: 91.6
+        Time since last run (seconds): ▂▁▁▁▁▁▁▁▁▁▁▁▁▅▇▁▁▁▁▂  min: 40.1k  max: 42.3k
 
-    Summary of Config Retrieval Time:
+Here each bar indicates the amount of nodes that fall within the region, for
+example we can see there are a group of node on the right that took longer
+to run than the others.
 
-       Average: 0.13
+You can find which of those nodes took longer than 50 seconds:
 
-    Summary of Total Resources:
-
-       Average: 7
-
-    Summary of Total Time:
-
-       Average: 0.13
-
-
-    Finished processing 2 / 2 hosts in 45.12 ms
-
+    $ mco find -S "resource().total_time>50"
 
 ### Enabling and disabling
 
