@@ -16,6 +16,8 @@ module MCollective
         def applying?
           return false if disabled?
 
+          return false unless File.exist?(Puppet[:agent_catalog_run_lockfile])
+
           if File::Stat.new(Puppet[:agent_catalog_run_lockfile]).size > 0
             return has_process_for_pid?(File.read(Puppet[:agent_catalog_run_lockfile]))
           end

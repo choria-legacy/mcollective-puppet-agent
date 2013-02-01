@@ -16,6 +16,8 @@ module MCollective
         def applying?
           return false if disabled?
 
+          return false unless File.exist?(Puppet[:puppetdlockfile])
+
           if File::Stat.new(Puppet[:puppetdlockfile]).size > 0
             return has_process_for_pid?(File.read(Puppet[:puppetdlockfile]))
           end
