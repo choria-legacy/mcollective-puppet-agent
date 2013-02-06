@@ -12,11 +12,15 @@ module MCollective
 
         include PuppetAgentMgr::Common
 
-        def initialize(testing=false)
+        def initialize(configfile=nil, testing=false)
           unless testing || Puppet.settings.app_defaults_initialized?
             require 'puppet/util/run_mode'
             Puppet.settings.preferred_run_mode = :agent
-            Puppet.settings.initialize_global_settings
+
+            args = []
+            (args << "--config=%s" % configfile) if configfile
+
+            Puppet.settings.initialize_global_settings(args)
             Puppet.settings.initialize_app_defaults(Puppet::Settings.app_defaults_for_run_mode(Puppet.run_mode))
           end
         end

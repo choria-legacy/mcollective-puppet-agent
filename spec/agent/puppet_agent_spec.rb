@@ -12,6 +12,15 @@ describe "puppet agent" do
     @agent = MCollective::Test::LocalAgentTest.new("puppet", :agent_file => @agent_file).plugin
   end
 
+  describe "#startup_hook" do
+    it "should support custom config files" do
+      MCollective::Config.instance.expects(:pluginconf).returns({"puppet.config" => "rspec"})
+      MCollective::Util::PuppetAgentMgr.expects(:manager).with("rspec")
+
+      @agent.startup_hook
+    end
+  end
+
   describe "#disable" do
     it "should support using a default message" do
       t = Time.now

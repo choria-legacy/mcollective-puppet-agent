@@ -7,7 +7,9 @@ module MCollective
       end
 
       query do |resource|
-        puppet_agent = Util::PuppetAgentMgr.manager
+        configfile = Config.instance.pluginconf.fetch("puppet.config", nil)
+
+        puppet_agent = Util::PuppetAgentMgr.manager(configfile)
         summary = puppet_agent.load_summary
 
         result[:managed] = puppet_agent.managing_resource?(resource) if resource

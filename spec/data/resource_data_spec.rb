@@ -5,16 +5,19 @@ require '%s/../../util/puppet_agent_mgr.rb' % File.dirname(__FILE__)
 
 describe "puppet data" do
   before do
-    @manager = mock
-    MCollective::Util::PuppetAgentMgr.stubs(:manager).returns(@manager)
-
     @data_file = File.join([File.dirname(__FILE__), "../../data/resource_data.rb"])
     @data = MCollective::Test::DataTest.new("resource_data", :data_file => @data_file).plugin
   end
 
+
   describe "#query_data" do
     it "should work" do
-      @manager.expects(:load_summary).returns({"version"=>{"puppet"=>"3.0.0", "config"=>1350376829},
+      MCollective::Config.instance.expects(:pluginconf).returns({"puppet.config" => "rspec"})
+      manager = mock
+      MCollective::Util::PuppetAgentMgr.expects(:manager).with("rspec").returns(manager)
+
+
+      manager.expects(:load_summary).returns({"version"=>{"puppet"=>"3.0.0", "config"=>1350376829},
                                               "changes"=>{"total"=>1},
                                               "resources"=> {"out_of_sync"=>1,
                                                 "failed"=>0,
@@ -31,7 +34,7 @@ describe "puppet data" do
                                                   "config_retrieval"=>0.148587},
                                                   "events"=>{"total"=>1, "failure"=>0, "success"=>1}})
 
-      @manager.expects(:managing_resource?).with("File[rspec]").returns(true)
+      manager.expects(:managing_resource?).with("File[rspec]").returns(true)
 
       time = Time.now; Time.expects(:now).returns(time)
       @data.lookup("File[rspec]").should have_data_items({:managed => true,

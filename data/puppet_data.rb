@@ -7,7 +7,9 @@ module MCollective
       end
 
       query do |resource|
-        puppet_agent = Util::PuppetAgentMgr.manager
+        configfile = Config.instance.pluginconf.fetch("puppet.config", nil)
+
+        puppet_agent = Util::PuppetAgentMgr.manager(configfile)
         status = puppet_agent.status
 
         [:applying, :enabled, :daemon_present, :lastrun, :since_lastrun, :status, :disable_message, :idling].each do |item|

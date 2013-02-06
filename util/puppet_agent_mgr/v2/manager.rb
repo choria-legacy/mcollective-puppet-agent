@@ -12,10 +12,11 @@ module MCollective
           include Unix
         end
 
-        def initialize(testing=false)
+        def initialize(configfile=nil, testing=false)
           unless testing
             $puppet_application_mode = Puppet::Util::RunMode[:agent]
             Puppet.settings.use :main, :agent
+            Puppet.settings.set_value(:config, configfile, :cli) if configfile
             Puppet.parse_config
           end
         end

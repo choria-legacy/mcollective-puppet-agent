@@ -12,7 +12,7 @@ module MCollective::Util
   module PuppetAgentMgr::V3
     describe Manager do
       before :each do
-        @manager = PuppetAgentMgr::V3::Manager.new(true)
+        @manager = PuppetAgentMgr::V3::Manager.new(nil, true)
       end
 
       describe "#enable!" do

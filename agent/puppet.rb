@@ -7,7 +7,9 @@ module MCollective
       end
 
       def startup_hook
-        @puppet_agent = Util::PuppetAgentMgr.manager
+        configfile = @config.pluginconf.fetch("puppet.config", nil)
+
+        @puppet_agent = Util::PuppetAgentMgr.manager(configfile)
         @puppet_command = @config.pluginconf.fetch("puppet.command", "puppet agent")
         @puppet_splaylimit = Integer(@config.pluginconf.fetch("puppet.splaylimit", 30))
         @puppet_splay = @config.pluginconf.fetch("puppet.splay", "true")
