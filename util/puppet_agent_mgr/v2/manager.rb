@@ -69,12 +69,29 @@ module MCollective
 
         # loads the summary file and makes sure that some keys are always present
         def load_summary
-          summary = {"changes" => {}, "time" => {}, "resources" => {}, "version" => {}, "events" => {}}
+          summary = {"changes" => {}, "time" => {}, "resources" => {}, "version" => {}, "events" => {}, :list_changed_resources => [], :list_failed_resources => [], :list_out_of_sync_resources => [], :list_skipped_resources => [] }
 
           summary.merge!(YAML.load_file(Puppet[:lastrunfile])) if File.exist?(Puppet[:lastrunfile])
-
           summary["resources"] = {"failed"=>0, "changed"=>0, "total"=>0, "restarted"=>0, "out_of_sync"=>0}.merge!(summary["resources"])
-
+          
+          changed_resources = YAML.load_file(Puppet[:lastrunreport]).resource_statuses.find_all {|f| f[1].changed?}
+          failed_resources = YAML.load_file(Puppet[:lastrunreport]).resource_statuses.find_all {|f| f[1].failed?}
+          skipped_resources = YAML.load_file(Puppet[:lastrunreport]).resource_statuses.find_all {|f| f[1].skipped?}
+          out_of_sync_resources = YAML.load_file(Puppet[:lastrunreport]).resource_statuses.find_all {|f| f[1].out_of_sync?}
+          
+          changed_resources.each do |r|
+            summary[:list_changed_resources] << r.first
+          end
+          failed_resources.each do |r|
+            summary[:list_failed_resources] << r.first
+          end
+          skipped_resources.each do |r|
+            summary[:list_skipped_resources] << r.first
+          end
+          out_of_sync_resources.each do |r|
+            summary[:list_out_of_sync_resources] << r.first
+          end
+          
           summary
         end
       end
