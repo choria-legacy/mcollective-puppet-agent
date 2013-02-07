@@ -64,6 +64,11 @@ END_OF_USAGE
          :arguments   => ["--splaylimit SECONDS"],
          :description => "Maximum splay time for this run if splay is set",
          :type        => Integer
+         
+  option :detail,
+         :arguments   => ["--detail"],
+         :description => "Show details of changed applied",
+         :type        => :bool
 
   def raise_message(message, *args)
     messages = {1 => "Action must be count, enable, disable, runall, runonce, status or summary",
@@ -233,7 +238,7 @@ END_OF_USAGE
   end
 
   def summary_command
-    client.progress = false
+    client. progress = false
     results = client.last_run_summary
 
     puts "Summary statistics for %d nodes:" % results.size
@@ -247,6 +252,26 @@ END_OF_USAGE
     puts "    Time since last run (seconds): %s" % sparkline_for_field(results, :since_lastrun)
     puts
 
+    color_red = "\e[31m"
+    color_green = "\e[32m"
+    color_yellow = "\e[33m"
+    color_reset = "\e[0m"
+    
+    report_items={:list_changed_resources => "#{color_green}CHANGED  ",
+                  :list_failed_resources => "#{color_red}FAILED  ",
+                  :list_skipped_resources => "#{color_yellow}SKIPPED "}
+                      
+    results.each do |result|
+      sender = result[:sender]
+      puts "* #{sender}"
+      report_items.each do |summary_token, print_prefix| 
+        data = result[:data][:summary][summary_token]
+        data.each do |resource|
+          puts "  #{print_prefix}: #{resource}#{color_reset}"
+        end unless data.nil?
+      end
+    end if configuration[:detail]
+    
     halt client.stats
   end
 
