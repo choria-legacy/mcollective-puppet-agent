@@ -65,6 +65,11 @@ END_OF_USAGE
          :description => "Maximum splay time for this run if splay is set",
          :type        => Integer
 
+  option :ignoreschedules,
+         :arguments   => ["--ignoreschedules"],
+         :description => "Disable schedule processing",
+         :type        => :bool
+
   def raise_message(message, *args)
     messages = {1 => "Action must be count, enable, disable, runall, runonce, status or summary",
                 2 => "Please specify a command.",
@@ -207,7 +212,7 @@ END_OF_USAGE
   def runonce_arguments
     arguments = {}
 
-    [:force, :server, :noop, :environment, :splay, :splaylimit].each do |arg|
+    [:force, :server, :noop, :environment, :splay, :splaylimit, :ignoreschedules].each do |arg|
       arguments[arg] = configuration[arg] if configuration.include?(arg)
     end
 

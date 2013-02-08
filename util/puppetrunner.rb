@@ -97,7 +97,7 @@ module MCollective
       def runonce_arguments
         arguments = {}
 
-        [:force, :server, :noop, :environment, :splay, :splaylimit].each do |arg|
+        [:force, :server, :noop, :environment, :splay, :splaylimit, :ignoreschedules].each do |arg|
           arguments[arg] = @configuration[arg] if @configuration.include?(arg)
         end
 

@@ -77,6 +77,10 @@ Most basic case is just a run:
 
     $ mco puppet runonce --no-splay
 
+...or if you want to ignore schedules for a single run
+
+    $ mco puppet runonce --ignoreschedules
+
 These can all be combined to your liking
 
 ### Requesting agent status

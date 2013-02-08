@@ -76,6 +76,7 @@ module MCollective
         args[:environment] = request[:environment] if request[:environment]
         args[:server] = request[:server] if request[:server]
         args[:tags] = request[:tags].split(",").map{|t| t.strip} if request[:tags]
+        args[:ignoreschedules] = request[:ignoreschedules] if request[:ignoreschedules]
 
         # we can only pass splay arguments if the daemon isn't running :(
         unless @puppet_agent.status[:daemon_present]

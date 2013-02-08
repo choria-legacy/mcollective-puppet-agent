@@ -60,7 +60,7 @@ module MCollective
           true
         end
 
-        def create_common_puppet_cli(noop=nil, tags=[], environment=nil, server=nil, splay=nil, splaylimit=nil)
+        def create_common_puppet_cli(noop=nil, tags=[], environment=nil, server=nil, splay=nil, splaylimit=nil, ignoreschedules=nil)
           opts = []
           tags = [tags].flatten.compact
 
@@ -89,25 +89,27 @@ module MCollective
           opts << "--environment %s" % environment if environment
           opts << "--server %s" % host if host
           opts << "--masterport %s" % port if port
+          opts << "--ignoreschedules" if ignoreschedules
 
           opts
         end
 
         # do a run based on the following options:
         #
-        # :foreground_run - runs in the foreground a --test run
-        # :signal_daemon  - if the daemon is running, sends it USR1 to wake it up
-        # :noop           - enables or disabled noop mode based on true/false
-        # :tags           - an array of tags to limit the run to
-        # :environment    - the environment to run
-        # :server         - the puppet master to use, can be some.host or some.host:port
-        # :splay          - enables or disables splay based on true/false
-        # :splaylimit     - set the maximum splay time
+        # :foreground_run  - runs in the foreground a --test run
+        # :signal_daemon   - if the daemon is running, sends it USR1 to wake it up
+        # :noop            - enables or disabled noop mode based on true/false
+        # :tags            - an array of tags to limit the run to
+        # :environment     - the environment to run
+        # :server          - the puppet master to use, can be some.host or some.host:port
+        # :splay           - enables or disables splay based on true/false
+        # :splaylimit      - set the maximum splay time
+        # :ignoreschedules - instructs puppet to ignore any defined schedules
         #
         # else a single background run will be attempted but this will fail if a idling
         # daemon is present and :signal_daemon was false
         def runonce!(options={})
-          valid_options = [:noop, :signal_daemon, :foreground_run, :tags, :environment, :server, :splay, :splaylimit, :options_only]
+          valid_options = [:noop, :signal_daemon, :foreground_run, :tags, :environment, :server, :splay, :splaylimit, :options_only, :ignoreschedules]
 
           options.keys.each do |opt|
             raise("Unknown option %s specified" % opt) unless valid_options.include?(opt)
@@ -123,9 +125,10 @@ module MCollective
           foreground_run = options.fetch(:foreground_run, false)
           environment = options.fetch(:environment, nil)
           server = options.fetch(:server, nil)
+          ignoreschedules = options.fetch(:ignoreschedules, nil)
           tags = [ options[:tags] ].flatten.compact
 
-          clioptions = create_common_puppet_cli(noop, tags, environment, server, splay, splaylimit)
+          clioptions = create_common_puppet_cli(noop, tags, environment, server, splay, splaylimit, ignoreschedules)
 
           if idling? && signal_daemon && !clioptions.empty?
             raise "Cannot specify any custom puppet options when the daemon is running"

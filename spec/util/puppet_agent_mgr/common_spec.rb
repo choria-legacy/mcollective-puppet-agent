@@ -65,6 +65,12 @@ module MCollective::Util
         it "should support splaylimit" do
           Common.create_common_puppet_cli(nil, nil, nil, nil, true, 10).should == ["--splay", "--splaylimit 10"]
         end
+
+        it "should support ignoreschedules" do
+          Common.create_common_puppet_cli(nil, nil, nil, nil, nil, nil, true).should == ["--ignoreschedules"]
+
+        end
+
       end
 
       describe "#runonce!" do

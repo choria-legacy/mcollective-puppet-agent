@@ -155,6 +155,12 @@ describe "puppet agent" do
       result.should be_successful
     end
 
+    it "should support ignoreschedules" do
+      @manager.expects(:runonce!).with({:options_only=>true, :ignoreschedules=>true, :splay=>true, :splaylimit=>30}).returns([:signal_running_daemon, []])
+      result = @agent.call(:runonce, :ignoreschedules => true)
+      result.should be_successful
+    end
+
     it "should support no-noop" do
       @manager.expects(:runonce!).with({:options_only=>true, :splay=>true, :noop=>false, :splaylimit=>30}).returns([:signal_running_daemon, []])
       result = @agent.call(:runonce, :noop => false)

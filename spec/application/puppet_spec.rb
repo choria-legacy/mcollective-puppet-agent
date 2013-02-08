@@ -160,8 +160,9 @@ module MCollective
           @app.configuration[:splay] = true
           @app.configuration[:splaylimit] = 60
           @app.configuration[:tag] = ["one", "two"]
+          @app.configuration[:ignoreschedules] = true
 
-          @app.runonce_arguments.should == {:splaylimit=>60, :force=>true, :environment=>"rspec", :noop=>true, :server=>"rspec:123", :tags=>"one,two", :splay=>true}
+          @app.runonce_arguments.should == {:splaylimit=>60, :force=>true, :environment=>"rspec", :noop=>true, :server=>"rspec:123", :tags=>"one,two", :splay=>true, :ignoreschedules=>true}
         end
       end
 
@@ -243,6 +244,7 @@ module MCollective
           @app.configuration[:splay] = true
           @app.configuration[:splaylimit] = 60
           @app.configuration[:tag] = ["one", "two"]
+          @app.configuration[:ignoreschedules] = true
 
           @app.client.expects(:runonce).with(:force => true,
                                              :server => "rspec:123",
@@ -250,6 +252,7 @@ module MCollective
                                              :environment => "rspec",
                                              :splay => true,
                                              :splaylimit => 60,
+                                             :ignoreschedules => true,
                                              :tags => "one,two").returns("result")
           @app.expects(:halt)
           @app.runonce_command
