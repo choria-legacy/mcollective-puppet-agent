@@ -31,7 +31,7 @@ END_OF_USAGE
          :type        => String
 
   option :tag,
-         :arguments   => ["--tag TAG"],
+         :arguments   => ["--tags TAG", "--tag"],
          :description => "Restrict the run to specific tags",
          :type        => :array
 

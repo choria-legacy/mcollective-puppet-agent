@@ -54,6 +54,8 @@ Most basic case is just a run:
 ...just some tags
 
     $ mco puppet runonce --tag one --tag two --tag three
+    $ mco puppet runonce --tag one,two,three
+    $ mco puppet runonce --tags one,two,three
 
 ...a noop run
 
