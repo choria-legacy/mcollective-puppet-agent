@@ -101,6 +101,7 @@ describe "puppet agent" do
                  "time"=>{"filebucket"=>0.000144, "last_run"=>1350376830, "config_retrieval"=>0.148587, "notify"=>0.001058, "total"=>0.149789}}
 
       @manager.expects(:load_summary).returns(summary)
+      @manager.expects(:managed_resource_type_distribution).returns({"File" => 1, "Exec" => 2})
 
       result = @agent.call(:last_run_summary)
       result.should be_successful
@@ -114,6 +115,7 @@ describe "puppet agent" do
       result[:data][:since_lastrun].should == Integer((t - 1350376830))
       result[:data][:config_version].should == 1350376829
       result[:data][:summary].should == summary
+      result[:data][:type_distribution].should == {"File" => 1, "Exec" => 2}
     end
   end
 

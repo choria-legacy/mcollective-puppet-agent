@@ -34,6 +34,33 @@ module MCollective
           managed_resources.size
         end
 
+        # how mnay of each type of resource is the node
+        def managed_resource_type_distribution
+          type_distribution = {}
+
+          if File.exist?(Puppet[:resourcefile])
+            File.readlines(Puppet[:resourcefile]).each do |line|
+              type = line.split("[").first.split("::").map {|i| i.capitalize}.join("::")
+
+              type_distribution[type] ||= 0
+              type_distribution[type] += 1
+            end
+          end
+
+          type_distribution
+        end
+
+        # loads the summary file and makes sure that some keys are always present
+        def load_summary
+          summary = {"changes" => {}, "time" => {}, "resources" => {}, "version" => {}, "events" => {}}
+
+          summary.merge!(YAML.load_file(Puppet[:lastrunfile])) if File.exist?(Puppet[:lastrunfile])
+
+          summary["resources"] = {"failed"=>0, "changed"=>0, "total"=>0, "restarted"=>0, "out_of_sync"=>0}.merge!(summary["resources"])
+
+          summary
+        end
+
         def run_in_foreground(clioptions, execute=true)
           options = ["--test", "--color=false"].concat(clioptions)
 

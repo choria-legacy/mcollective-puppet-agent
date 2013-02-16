@@ -229,6 +229,39 @@ module MCollective::Util
         end
       end
 
+      describe "#managed_resource_type_distribution" do
+        it "should correctly count the resource types" do
+          Puppet.stubs(:[]).with(:resourcefile).returns("resourcefile")
+          File.stubs(:exist?).with("resourcefile").returns(true)
+          File.expects(:readlines).with("resourcefile").returns(["file[x]", "exec[foo[bar]]", "rspec::test[x]"])
+          Common.managed_resource_type_distribution.should == {"File" => 1,
+                                                               "Exec" => 1,
+                                                               "Rspec::Test" => 1}
+        end
+      end
+
+      describe "#load_summary" do
+        it "should return a default structure when no file is found" do
+          Puppet.expects(:[]).with(:lastrunfile).returns("lastrunfile")
+
+          Common.load_summary.should == {"changes" => {},
+                                         "time" => {},
+                                         "resources" => {"failed"=>0, "changed"=>0, "total"=>0, "restarted"=>0, "out_of_sync"=>0},
+                                         "version" => {},
+                                         "events" => {}}
+        end
+
+        it "should return merged results if the file is found" do
+          yamlfile = File.expand_path(File.join(File.dirname(__FILE__), "..", "..", "fixtures", "last_run_summary.yaml"))
+          Puppet.expects(:[]).with(:lastrunfile).returns(yamlfile).twice
+
+          Common.load_summary.should == {"changes" => {},
+                                         "time" => {},
+                                         "resources" => {},
+                                         "version" => {},
+                                         "events" => {}}.merge(YAML.load_file(yamlfile))
+        end
+      end
       describe "#managed_resources_count" do
         it "should report the right size" do
           Common.expects(:managed_resources).returns(["file[x]"])

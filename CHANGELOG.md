@@ -3,6 +3,7 @@ Changelog
 
 |Release Version|Date|Description|Ticket|
 |---------------|----|-----------|------|
+|1.4.1|2012/02/16|Provide type distribution data in the last_run_summary action|19284|
 |1.4.0|2012/02/08|Add support for --ignoreschedules|19106|
 |1.4.0|2012/02/08|Add --tags as an alias to --tag|19137|
 |1.3.0|2012/02/06|Support custom puppet config locations using plugin.puppet.config|19094

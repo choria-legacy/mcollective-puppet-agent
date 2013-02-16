@@ -123,26 +123,6 @@ module MCollective::Util
           @manager.disabled?.should == true
         end
       end
-
-      describe "#load_summary" do
-        it "should return a default structure when no file is found" do
-          Puppet.expects(:[]).with(:lastrunfile).returns("lastrunfile")
-          File.expects(:exist?).with("lastrunfile").returns(false)
-
-          @manager.load_summary.should == {"changes" => {},
-                                           "time" => {},
-                                           "resources" => {"failed"=>0, "changed"=>0, "total"=>0, "restarted"=>0, "out_of_sync"=>0},
-                                           "version" => {},
-                                           "events" => {}}
-        end
-
-        it "should return merged results if the file is found" do
-          yamlfile = File.expand_path(File.join(File.dirname(__FILE__), "..", "..", "fixtures", "last_run_summary.yaml"))
-          Puppet.expects(:[]).with(:lastrunfile).returns(yamlfile).twice
-
-          @manager.load_summary.should == {"changes" => {}, "time" => {}, "resources" => {}, "version" => {}, "events" => {}}.merge(YAML.load_file(yamlfile))
-        end
-      end
     end
   end
 end

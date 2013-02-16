@@ -2,7 +2,7 @@ metadata :name => "puppet",
          :description => "Run Puppet agent, get its status, and enable/disable it",
          :author => "R.I.Pienaar <rip@devco.net>",
          :license => "ASL2.0",
-         :version => "1.4.0",
+         :version => "1.4.1",
          :url => "http://puppetlabs.com",
          :timeout => 5
 
@@ -93,6 +93,11 @@ action "last_run_summary", :description => "Get the summary of the last Puppet r
            :description => "Puppet config version for the previously applied catalog",
            :display_as  => "Config Version",
            :default     => nil
+
+    output :type_distribution,
+           :description => "Resource counts per type managed by Puppet",
+           :display_as  => "Type Distribution",
+           :default     => {}
 
     output :summary,
            :description => "Summary data as provided by Puppet",
