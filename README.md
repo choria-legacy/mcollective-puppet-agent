@@ -134,17 +134,25 @@ We can show a graph view of various metrics of the last Puppet run using the
              Total run-time (seconds): ▇▄▂▁▄▄▂▃▁▁▁▂▂▁▁▄▂▁▁▁  min: 6.9    max: 91.6
         Time since last run (seconds): ▂▁▁▁▁▁▁▁▁▁▁▁▁▅▇▁▁▁▁▂  min: 40.1k  max: 42.3k
 
-Here each bar indicates the amount of nodes that fall within the region, for
-example we can see there are a group of node on the right that took longer
+Here each bar indicates the number of nodes that fall within the region, for
+example we can see there are a group of nodes on the right that took longer
 to run than the others.
 
 You can find which of those nodes took longer than 50 seconds:
 
     $ mco find -S "resource().total_time>50"
 
+#### Problems with Displaying the Bars
+
+Not all popular SSH clients display the bars correctly. Please ensure your client has UTF-8 
+enabled, and uses a suitable font such as [dejavu](http://dejavu-fonts.org/wiki/Main_Page). The 
+following clients have been confirmed to work:
+* [PuTTY](http://www.chiark.greenend.org.uk/~sgtatham/putty/) on Windows
+* [mintty](http://code.google.com/p/mintty/) on [Cygwin](www.cygwin.com) on Windows
+
 ### Enabling and disabling
 
-Puppet 3 supports a message when enabling and disableing
+Puppet 3 supports a message when enabling and disabling
 
     $ mco rpc puppet disable message="doing some hand hacking"
     $ mco rpc puppet enable
