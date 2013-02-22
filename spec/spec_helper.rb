@@ -13,6 +13,14 @@ require 'json'
 
 # fake puppet enough just to get by without requiring it to run tests
 module Puppet
+  class Type;end
+  class Transaction;end
+  class Transaction::Report;end
+  class Util;end
+  class Util::Log;end
+  class Resource;end
+  class Resource::Catalog;end
+
   def self.[](what)
     what.to_s
   end

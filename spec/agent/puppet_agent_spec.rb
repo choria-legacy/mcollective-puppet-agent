@@ -21,6 +21,110 @@ describe "puppet agent" do
     end
   end
 
+  describe "#resource" do
+    before do
+      @type = mock; @resource = mock; @catalog = mock; @report = mock
+      @resource_status = mock; @resource_statuses = mock
+
+      Puppet::Type.stubs(:type).returns(@type)
+      Puppet::Util::Log.stubs(:newdestination)
+      Puppet::Resource::Catalog.stubs(:new).returns(@catalog)
+      Puppet::Transaction::Report.stubs(:new).returns(@report)
+
+      @manager.stubs(:managing_resource?).returns(false)
+      @type.stubs(:new).returns(@resource)
+      @catalog.stubs(:add_resource)
+      @catalog.stubs(:apply)
+      @report.stubs(:logs).returns([])
+      @report.stubs(:resource_statuses).returns(@resource_statuses)
+      @resource_statuses.stubs(:[]).returns(@resource_status)
+      @resource_status.stubs(:failed).returns(false)
+      @resource_status.stubs(:changed).returns(true)
+      @agent.config.stubs(:pluginconf).returns({"puppet.resource_type_whitelist" => "notify,host"})
+    end
+
+    it "should not allow both a white and a blacklist" do
+      @agent.config.stubs(:pluginconf).returns({"puppet.resource_type_whitelist" => "notify,host",
+                                                "puppet.resource_type_blacklist" => "x"})
+
+      result = @agent.call(:resource, :type => "notify", :name => "hello world")
+      result.should be_aborted_error
+      result[:statusmsg].should == "You cannot specify both puppet.resource_type_whitelist and puppet.resource_type_blacklist in the config file"
+    end
+
+    it "should only allow types on the whitelist when set" do
+      ["notify", "host"].each do |t|
+        result = @agent.call(:resource, :type => t, :name => "hello world")
+        result.should be_successful
+        result[:data][:result].should == "no output produced"
+      end
+
+      result = @agent.call(:resource, :type => "exec", :name => "hello world")
+      result.should be_aborted_error
+    end
+
+    it "should not allow types on the blacklist when set" do
+      @agent.config.stubs(:pluginconf).returns({"puppet.resource_type_blacklist" => "notify,host"})
+
+      ["notify", "host"].each do |t|
+        result = @agent.call(:resource, :type => t, :name => "hello world")
+        result.should be_aborted_error
+      end
+
+      result = @agent.call(:resource, :type => "exec", :name => "hello world")
+      result.should be_successful
+      result[:data][:result].should == "no output produced"
+    end
+
+    it "should reply with the logs joined if there are any" do
+      @report.stubs(:logs).returns(["one", "two"])
+
+      result = @agent.call(:resource, :type => "notify", :name => "hello world")
+      result.should be_successful
+      result[:data][:result].should == "one\ntwo"
+    end
+
+    it "should fail the request if the resource failed to apply" do
+      @resource_status.stubs(:failed).returns(true)
+      result = @agent.call(:resource, :type => "notify", :name => "hello world")
+      result.should be_aborted_error
+      result[:statusmsg].should == "Failed to apply Notify[hello world]: no output produced"
+    end
+
+    it "should refuse to manage managed resources when configured so" do
+      @manager.stubs(:managing_resource?).returns(true)
+      @agent.config.stubs(:pluginconf).returns({"puppet.resource_type_whitelist" => "notify,host",
+                                                "puppet.resource_allow_managed_resources" => "false"})
+
+      result = @agent.call(:resource, :type => "notify", :name => "hello world")
+      result.should be_aborted_error
+      result[:statusmsg].should == "Puppet is managing the resource 'Notify[hello world]', refusing to create conflicting states"
+    end
+
+    it "should allow managing puppet managed resources when configured so" do
+      @manager.stubs(:managing_resource?).returns(true)
+      @agent.config.stubs(:pluginconf).returns({"puppet.resource_type_whitelist" => "notify,host",
+                                                "puppet.resource_allow_managed_resources" => "true"})
+
+      result = @agent.call(:resource, :type => "notify", :name => "hello world")
+      result.should be_successful
+    end
+
+    it "should correctly report the resource change state on success" do
+      result = @agent.call(:resource, :type => "notify", :name => "hello world")
+      result.should be_successful
+      result.should have_data_items({:changed => true})
+    end
+
+    it "should correctly report the resource change state on failure" do
+      @resource_status.stubs(:changed).returns(false)
+
+      result = @agent.call(:resource, :type => "notify", :name => "hello world")
+      result.should be_successful
+      result.should have_data_items({:changed => false})
+    end
+  end
+
   describe "#disable" do
     it "should support using a default message" do
       t = Time.now

@@ -8,6 +8,36 @@ metadata :name => "puppet",
 
 requires :mcollective => "2.2.1"
 
+action "resource", :description => "Evaluate Puppet RAL resources" do
+    display :always
+
+    input :name,
+          :prompt      => "Name",
+          :description => "Resource Name",
+          :type        => :string,
+          :validation  => '^.+$',
+          :optional    => false,
+          :maxlength   => 150
+
+    input :type,
+          :prompt      => "Type",
+          :description => "Resource Type",
+          :type        => :string,
+          :validation  => '^.+$',
+          :optional    => false,
+          :maxlength   => 50
+
+    output :result,
+           :description => "The result from the Puppet resource",
+           :display_as  => "Result",
+           :default     => ""
+
+    output :changed,
+           :description => "Was a change applied based on the resource",
+           :display_as  => "Changed",
+           :default     => nil
+end
+
 action "disable", :description => "Disable the Puppet agent" do
     input :message,
           :prompt      => "Message",

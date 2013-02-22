@@ -59,6 +59,56 @@ module MCollective
         @reply.data.merge!(status)
       end
 
+      action "resource" do
+        allow_managed_resources_management = !!@config.pluginconf.fetch("puppet.resource_allow_managed_resources", "false").match(/^1|true|yes/)
+        resource_types_whitelist = @config.pluginconf.fetch("puppet.resource_type_whitelist", nil)
+        resource_types_blacklist = @config.pluginconf.fetch("puppet.resource_type_blacklist", nil)
+
+        reply.fail!("You cannot specify both puppet.resource_type_whitelist and puppet.resource_type_blacklist in the config file") if resource_types_whitelist && resource_types_blacklist
+
+        # if 'none' is specified whitelist nothing
+        resource_types_whitelist = "" if resource_types_whitelist == "none"
+
+        # if neither is specified default to whitelisting nothing thus denying everything
+        resource_types_whitelist = "" if resource_types_blacklist.nil? && resource_types_whitelist.nil?
+
+        params = request.data.clone
+        params.delete(:process_results)
+        type = params.delete(:type).downcase
+        resource_name = "%s[%s]" % [type.to_s.capitalize, params[:name]]
+
+        if resource_types_blacklist
+          if resource_types_blacklist.split(",").include?(type)
+            reply.fail!("The %s type is listed in the type blacklist" % type)
+          end
+        elsif resource_types_whitelist
+          unless resource_types_whitelist.split(",").include?(type)
+            reply.fail!("The %s type is not listed in the type whitelist" % type)
+          end
+        end
+
+        if allow_managed_resources_management || !@puppet_agent.managing_resource?(resource_name)
+          resource = ::Puppet::Type.type(type).new(params)
+          report = ::Puppet::Transaction::Report.new(:mcollective)
+          ::Puppet::Util::Log.newdestination(report)
+          catalog = ::Puppet::Resource::Catalog.new
+          catalog.add_resource(resource)
+          catalog.apply(:report => report)
+
+          if report.logs.empty?
+            reply[:result] = "no output produced"
+          else
+            reply[:result] = report.logs.join("\n")
+          end
+
+          reply[:changed] = report.resource_statuses[resource_name].changed
+
+          reply.fail!("Failed to apply %s: %s" % [resource_name, reply[:result]]) if report.resource_statuses[resource_name].failed
+        else
+          reply.fail!("Puppet is managing the resource '%s', refusing to create conflicting states" % resource_name)
+        end
+      end
+
       action "runonce" do
         args = {}
 

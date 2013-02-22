@@ -7,17 +7,19 @@ mco puppet [OPTIONS] [FILTERS] <ACTION> [CONCURRENCY|MESSAGE]
 Usage: mco puppet <count|enable|status|summary>
 Usage: mco puppet disable [message]
 Usage: mco puppet runonce [PUPPET OPTIONS]
+Usage: mco puppet resource type name property1=value property2=value
 
 The ACTION can be one of the following:
 
-    count   - return a total count of running, enabled, and disabled nodes
-    enable  - enable the Puppet Agent if it was previously disabled
-    disable - disable the Puppet Agent preventing catalog from being applied
-    runall  - invoke a puppet run on matching nodes, making sure to only run
-              CONCURRENCY nodes at a time
-    runonce - invoke a Puppet run on matching nodes
-    status  - shows a short summary about each Puppet Agent status
-    summary - shows resource and run time summaries
+    count    - return a total count of running, enabled, and disabled nodes
+    enable   - enable the Puppet Agent if it was previously disabled
+    disable  - disable the Puppet Agent preventing catalog from being applied
+    resource - manage individual resources using the Puppet Type (RAL) system
+    runall   - invoke a puppet run on matching nodes, making sure to only run
+               CONCURRENCY nodes at a time
+    runonce  - invoke a Puppet run on matching nodes
+    status   - shows a short summary about each Puppet Agent status
+    summary  - shows resource and run time summaries
 END_OF_USAGE
 
   option :force,
@@ -70,15 +72,65 @@ END_OF_USAGE
          :description => "Disable schedule processing",
          :type        => :bool
 
+
+  def post_option_parser(configuration)
+    if ARGV.length >= 1
+      configuration[:command] = ARGV.shift
+
+      if arg = ARGV.shift
+        if configuration[:command] == "runall"
+          configuration[:concurrency] = Integer(arg)
+
+        elsif configuration[:command] == "disable"
+          configuration[:message] = arg
+
+        elsif configuration[:command] == "resource"
+          configuration[:type] = arg
+          configuration[:name] = ARGV.shift
+          configuration[:properties] = ARGV[0..-1]
+        end
+      end
+
+      unless ["resource", "count", "runonce", "enable", "disable", "runall", "status", "summary"].include?(configuration[:command])
+        raise_message(1)
+      end
+    else
+      raise_message(2)
+    end
+  end
+
+  def validate_configuration(configuration)
+    if configuration[:force]
+      raise_message(3) if configuration.include?(:splay)
+      raise_message(4) if configuration.include?(:splaylimit)
+    end
+
+    if configuration[:command] == "runall"
+      if configuration[:concurrency]
+        raise_message(7) unless configuration[:concurrency] > 0
+      else
+        raise_message(5)
+      end
+    elsif configuration[:command] == "resource"
+      raise_message(9) unless configuration[:type]
+      raise_message(10) unless configuration[:name]
+    end
+
+    configuration[:noop] = false if configuration[:no_noop]
+    configuration[:splay] = false if configuration[:no_splay]
+  end
+
   def raise_message(message, *args)
-    messages = {1 => "Action must be count, enable, disable, runall, runonce, status or summary",
+    messages = {1 => "Action must be count, enable, disable, resource, runall, runonce, status or summary",
                 2 => "Please specify a command.",
                 3 => "Cannot set splay when forcing runs",
                 4 => "Cannot set splaylimit when forcing runs",
                 5 => "The runall command needs a concurrency limit",
                 6 => "Do not know how to handle the '%s' command",
                 7 => "The concurrency for the runall command has to be greater than 0",
-                8 => "The runall command cannot be used with compound or -S filters on the CLI"}
+                8 => "The runall command cannot be used with compound or -S filters on the CLI",
+                9 => "The resource command needs a type to operate on",
+                10 => "The resource command needs a name to operate on"}
 
     raise messages[message] % args
   end
@@ -136,46 +188,6 @@ END_OF_USAGE
     "%s  min: %-6s max: %-6s" % [spark(buckets), shorten_number(min), shorten_number(max)]
   end
 
-
-  def post_option_parser(configuration)
-    if ARGV.length >= 1
-      configuration[:command] = ARGV.shift
-
-      if arg = ARGV.shift
-        if configuration[:command] == "runall"
-          configuration[:concurrency] = Integer(arg)
-
-        elsif configuration[:command] == "disable"
-          configuration[:message] = arg
-        end
-      end
-
-      unless ["count", "runonce", "enable", "disable", "runall", "status", "summary"].include?(configuration[:command])
-        raise_message(1)
-      end
-    else
-      raise_message(2)
-    end
-  end
-
-  def validate_configuration(configuration)
-    if configuration[:force]
-      raise_message(3) if configuration.include?(:splay)
-      raise_message(4) if configuration.include?(:splaylimit)
-    end
-
-    if configuration[:command] == "runall"
-      if configuration[:concurrency]
-        raise_message(7) unless configuration[:concurrency] > 0
-      else
-        raise_message(5)
-      end
-    end
-
-    configuration[:noop] = false if configuration[:no_noop]
-    configuration[:splay] = false if configuration[:no_splay]
-  end
-
   def client
     @client ||= rpcclient("puppet")
   end
@@ -219,6 +231,22 @@ END_OF_USAGE
     arguments[:tags] = Array(configuration[:tag]).join(",") if configuration.include?(:tag)
 
     arguments
+  end
+
+  def resource_command
+    arguments = {:name => configuration[:name], :type => configuration[:type]}
+
+    configuration[:properties].each do |v|
+      if v =~ /^(.+?)=(.+)$/
+        arguments[$1] = $2
+      else
+        raise("Could not parse argument '%s'" % v)
+      end
+    end
+
+    printrpc client.resource(arguments)
+
+    printrpcstats
   end
 
   def runall_command(runner=nil)

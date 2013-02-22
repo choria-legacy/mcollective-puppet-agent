@@ -38,7 +38,24 @@ By default it just works but there are a few settings you can tweak in *server.c
     plugin.puppet.splaylimit = 30
     plugin.puppet.config = /etc/puppet/puppet.conf
 
-These are the defaults, adjust to taste
+These are the defaults, adjust to taste.
+
+The agent allow managing of any resource via the Puppet RAL, by default it refuses to
+manage a resource also managed by Puppet which could create conflicting state.  If you
+do wish to allow any resources to be managed set this to true:
+
+    plugin.puppet.resource_allow_managed_resources = true
+
+The resource action can manage any resource type Puppet can, by default we blacklist
+the all types due to the potential damage this feature can do to your system if not
+correctly setup.  You can specify either a whitelist or a blacklist of types this
+agent will be able to manage - you cannot specify both a blacklist and a whitelist.
+
+    plugin.puppet.resource_type_whitelist = host,alias
+    plugin.puppet.resource_type_blacklist = exec
+
+If you supply the value *none* to *type_whitelist* it will have the effect of denying
+all resource management - this is the default.
 
 ## Usage
 ### Running Puppet
@@ -144,8 +161,8 @@ You can find which of those nodes took longer than 50 seconds:
 
 #### Problems with Displaying the Bars
 
-Not all popular SSH clients display the bars correctly. Please ensure your client has UTF-8 
-enabled, and uses a suitable font such as [dejavu](http://dejavu-fonts.org/wiki/Main_Page). The 
+Not all popular SSH clients display the bars correctly. Please ensure your client has UTF-8
+enabled, and uses a suitable font such as [dejavu](http://dejavu-fonts.org/wiki/Main_Page). The
 following clients have been confirmed to work:
 * [PuTTY](http://www.chiark.greenend.org.uk/~sgtatham/putty/) on Windows
 * [mintty](http://code.google.com/p/mintty/) on [Cygwin](www.cygwin.com) on Windows
