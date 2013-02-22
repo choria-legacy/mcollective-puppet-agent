@@ -19,7 +19,7 @@ module MCollective
         Validator.stubs(:typecheck).returns(true)
 
         ["rspec", "rspec[mcollective", "[mcollective]", 1, "rspec[]", "rspec-rspec[rspec]"].each do |resource|
-          expect { Puppet_resourceValidator.validate(resource) }.to raise_error(/is not a valid resource name/)
+          expect { Puppet_resourceValidator.validate(resource) }.to raise_error("'#{resource}' is not a valid resource name")
         end
       end
     end

@@ -3,6 +3,7 @@ Changelog
 
 |Release Version|Date|Description|Ticket|
 |---------------|----|-----------|------|
+|1.5.0|2013/02/22|Improve error message when a resource does not pass validation|19384|
 |1.5.0|2013/02/22|Correctly handle mixed case resource names when determining if a resource is managed|19384|
 |1.5.0|2013/02/22|Add the _mco puppet resource_ command|12712|
 |1.4.1|2013/02/16|Provide type distribution data in the last_run_summary action|19284|
