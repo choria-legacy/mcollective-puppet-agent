@@ -222,10 +222,15 @@ module MCollective::Util
 
       describe "#managing_resource?" do
         it "should correctly report the managed state" do
-          Common.expects(:managed_resources).returns(["file[x]"]).twice
+          Common.expects(:managed_resources).returns(["file[x]"]).times(3)
 
           Common.managing_resource?("File[x]").should == true
           Common.managing_resource?("File[y]").should == false
+          Common.managing_resource?("File[X]").should == false
+        end
+
+        it "should fail on resource names it cannot parse" do
+          expect { Common.managing_resource?("File") }.to raise_error("Invalid resource name File")
         end
       end
 

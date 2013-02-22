@@ -26,7 +26,11 @@ module MCollective
 
         # if a resource is being managed, resource in the syntax File[/x] etc
         def managing_resource?(resource)
-          managed_resources.include?(resource.downcase)
+          if resource =~ /^(.+?)\[(.+)$/
+            managed_resources.include?([$1.downcase, $2].join("["))
+          else
+            raise "Invalid resource name %s" % resource
+          end
         end
 
         # how many resources are managed
