@@ -36,6 +36,10 @@ action "resource", :description => "Evaluate Puppet RAL resources" do
            :description => "Was a change applied based on the resource",
            :display_as  => "Changed",
            :default     => nil
+
+    summarize do
+        aggregate boolean_summary(:changed, {:true => "Changed", :false => "No Change"})
+    end
 end
 
 action "disable", :description => "Disable the Puppet agent" do

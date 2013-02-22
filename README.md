@@ -290,3 +290,68 @@ And you can then allow the manager user to disable and enable nodes using the
 
 Together this allows you to ensure that you both have a maintenance window and a
 period where Puppet will not start services again without your knowledge
+
+### Managing individual resources using the RAL
+
+Puppet is built on resource types and providers for those types, an instance of
+a resource type looks like:
+
+    host{"db":
+      ip  =>  "192.168.1.10"
+    }
+
+These are known as the Resource Abstraction Layer or the RAL.
+
+You can use MCollective to manage individual parts of your servers using the
+RAL.
+
+To add a host entry to your webservers matching the above resource you can
+do the following:
+
+    $ mco puppet resource host db ip=192.168.1.11 -W role::webserver
+
+     * [ ============================================================> ] 11 / 11
+
+
+     node4.example.net
+        Result: ip changed '192.168.1.10' to '192.168.1.11'
+    .
+    .
+    Summary of Changed:
+
+       Changed = 1
+
+    Finished processing 11 / 11 hosts in 118.97 ms
+
+Here we used the RAL to change the hosts entry for the hostname *db* to 192.168.1.11
+and the output shows you it changed from a previous value to this entry.
+
+Any hosts where the operation failed will fail in the normal manner
+
+This is a very dangerous feature as people can make real changes to your machines
+and potentially cause all kinds of problems.
+
+We support a few restrictions:
+
+  * You can whitelist or blacklist which types can be executed, you want to avoid
+    exec types for example
+  * You can allow or deny the ability to change resources that Puppet is also managing
+    as you'd want to avoid creating conflicting state
+
+By default if not specifically configured this feature is not usable as it defaults
+to the following configuration:
+
+
+    plugin.puppet.resource_allow_managed_resources = true
+    plugin.puppet.resource_type_whitelist = none
+
+You can allow all types except the exec, service and package types using the
+following config line:
+
+    plugin.puppet.resource_type_blacklist = exec,service,package
+
+You cannot mix and match white and black lists.
+
+So to repeat by default this feature is effectively turned off as there is an empty
+whitelist by default - no types are allowed to be managed.  You should think carefully
+before enabling this feature and combine it with the Authorization system when you do

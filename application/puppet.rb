@@ -246,7 +246,9 @@ END_OF_USAGE
 
     printrpc client.resource(arguments)
 
-    printrpcstats
+    printrpcstats :summarize => true
+
+    halt client.stats
   end
 
   def runall_command(runner=nil)
