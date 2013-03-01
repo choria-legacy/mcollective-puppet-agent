@@ -204,6 +204,7 @@ you might expect:
     2013-01-16 16:14:29: Found 2 enabled nodes
     2013-01-16 16:14:32: Currently 1 node applying the catalog; waiting for less than 1
     2013-01-16 16:14:37: dev1.example.net schedule status: Started a background Puppet run using the 'puppet agent --onetime --daemonize --color=false' command
+    2013-01-16 16:14:38: 1 out of 2 hosts left to run in this iteration
     2013-01-16 16:14:40: Currently 1 node applying the catalog; waiting for less than 1
     2013-01-16 16:14:44: Currently 1 node applying the catalog; waiting for less than 1
     2013-01-16 16:14:48: Currently 1 node applying the catalog; waiting for less than 1
@@ -221,6 +222,15 @@ the concurrency limit.
 
 Note that you can pass flags like --noop and --no-noop but the splay settings will not work
 as the runall command does forced runs which negates splay.
+
+If you wish to repeat this in a loop forever you can pass the --rerun argument giving it
+the minimum amount of time a loop over all the nodes must take:
+
+    $ mco puppet runall 1 --rerun 3600
+
+This performs the same run logic as before but when it comes to the end of the run it
+will sleep for the difference between 3600 seconds and how long the run took.  If the
+run took longer than 3600 seconds it will immediately start a new one.
 
 ### Discovering based on agent status
 

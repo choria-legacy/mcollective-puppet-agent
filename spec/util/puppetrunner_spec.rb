@@ -28,11 +28,58 @@ module MCollective::Util
     end
 
     describe "#runall" do
+      it "should support reruns" do
+        @runner.expects(:runall_forever).with(100)
+        @runner.runall(true, 100)
+      end
+
+      it "should support single runs" do
+        @runner.expects(:runall_once)
+        @runner.runall(false, 100)
+      end
+    end
+
+    describe "#runall_forever" do
+      before do
+        @runner.stubs(:log)
+        @runner.stubs(:sleep)
+      end
+
+      it "should loop forever" do
+        @runner.expects(:runall_once).times(4)
+
+        @runner.runall_forever(1, 4)
+      end
+
+      it "should sleep for the correct period when the run was shorter than minimum" do
+        start = Time.now
+        stop = start + 10
+
+        Time.expects(:now).twice.returns(start, stop)
+
+        @runner.stubs(:runall_once)
+        @runner.expects(:sleep).with(10.0)
+        @runner.runall_forever(20, 1)
+      end
+
+      it "should not sleep when the run was longer than minimum" do
+        start = Time.now
+        stop = start + 10
+
+        Time.expects(:now).twice.returns(start, stop)
+
+        @runner.stubs(:runall_once)
+        @runner.expects(:sleep).never
+        @runner.runall_forever(1, 1)
+      end
+    end
+
+    describe "#runall_once" do
       it "should find enabled hosts and run them" do
         @runner.stubs(:log)
         @runner.expects(:find_enabled_nodes).returns(["rspec"])
         @runner.expects(:runhosts).with(["rspec"])
-        @runner.runall
+        @runner.runall_once
       end
     end
 

@@ -8,6 +8,7 @@ Usage: mco puppet <count|enable|status|summary>
 Usage: mco puppet disable [message]
 Usage: mco puppet runonce [PUPPET OPTIONS]
 Usage: mco puppet resource type name property1=value property2=value
+Usage: mco puppet runall [--rerun SECONDS] [PUPPET OPTIONS]
 
 The ACTION can be one of the following:
 
@@ -72,6 +73,10 @@ END_OF_USAGE
          :description => "Disable schedule processing",
          :type        => :bool
 
+  option :rerun,
+         :arguments   => ["--rerun SECONDS"],
+         :description => "When performing runall do so repeatedly with a minimum run time of SECONDS",
+         :type        => Integer
 
   def post_option_parser(configuration)
     if ARGV.length >= 1
@@ -264,7 +269,7 @@ END_OF_USAGE
       puts "%s: %s" % [Time.now.strftime("%F %T"), msg]
     end
 
-    runner.runall
+    runner.runall(!!configuration[:rerun], configuration[:rerun])
   end
 
   def summary_command
