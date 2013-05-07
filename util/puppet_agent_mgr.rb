@@ -3,7 +3,7 @@ require '%s/puppet_agent_mgr/common.rb' % File.dirname(__FILE__)
 module MCollective
   module Util
     module PuppetAgentMgr
-      def self.manager(configfile=nil)
+      def self.manager(configfile=nil, service_name='puppet')
         # puppet 2 requires this, 3 probably just ignores it
         $puppet_application_name = :agent
 
@@ -18,7 +18,7 @@ module MCollective
 
             when "3"
               require '%s/puppet_agent_mgr/v3/manager.rb' % File.dirname(__FILE__)
-              return V3::Manager.new(configfile)
+              return V3::Manager.new(configfile, service_name)
 
             else
               raise "Cannot manage Puppet version %s" % $1

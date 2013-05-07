@@ -14,8 +14,15 @@ describe "puppet agent" do
 
   describe "#startup_hook" do
     it "should support custom config files" do
-      MCollective::Config.instance.expects(:pluginconf).returns({"puppet.config" => "rspec"})
-      MCollective::Util::PuppetAgentMgr.expects(:manager).with("rspec")
+      MCollective::Config.instance.stubs(:pluginconf).returns({"puppet.config" => "rspec"})
+      MCollective::Util::PuppetAgentMgr.expects(:manager).with("rspec", "puppet")
+
+      @agent.startup_hook
+    end
+
+    it "should set the service name based on the config" do
+      MCollective::Config.instance.stubs(:pluginconf).returns({"puppet.windows_service" => "not-puppet"})
+      MCollective::Util::PuppetAgentMgr.expects(:manager).with(nil, "not-puppet")
 
       @agent.startup_hook
     end

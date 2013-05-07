@@ -25,9 +25,16 @@ module MCollective::Util
 
       it "should pass the supplied config file to the manager" do
         Puppet.expects(:version).returns("3.0.0")
-        PuppetAgentMgr::V3::Manager.expects(:new).with("rspec")
+        PuppetAgentMgr::V3::Manager.expects(:new).with("rspec", "puppet")
 
         PuppetAgentMgr.manager("rspec")
+      end
+
+      it "should pass the supplied service name to the manager" do
+        Puppet.expects(:version).returns("3.0.0")
+        PuppetAgentMgr::V3::Manager.expects(:new).with("rspec", "pe-puppet")
+
+        PuppetAgentMgr.manager("rspec", "pe-puppet")
       end
 
       it "should fail with a friendly error for unsupported puppet versions" do
