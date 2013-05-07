@@ -2,6 +2,8 @@ module MCollective
   module Util
     module PuppetAgentMgr::V3
       class Manager
+        include PuppetAgentMgr::Common
+
         if Puppet.features.microsoft_windows?
           require '%s/windows.rb' % File.dirname(__FILE__)
           include Windows
@@ -10,9 +12,8 @@ module MCollective
           include Unix
         end
 
-        include PuppetAgentMgr::Common
-
-        def initialize(configfile=nil, testing=false)
+        def initialize(configfile=nil, puppet_service='puppet', testing=false)
+          @puppet_service = puppet_service
           unless testing || Puppet.settings.app_defaults_initialized?
             require 'puppet/util/run_mode'
             Puppet.settings.preferred_run_mode = :agent

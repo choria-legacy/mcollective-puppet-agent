@@ -9,10 +9,29 @@ module MCollective
       def startup_hook
         configfile = @config.pluginconf.fetch("puppet.config", nil)
 
-        @puppet_agent = Util::PuppetAgentMgr.manager(configfile)
         @puppet_command = @config.pluginconf.fetch("puppet.command", "puppet agent")
+        @puppet_service = @config.pluginconf.fetch("puppet.windows_service", "puppet")
         @puppet_splaylimit = Integer(@config.pluginconf.fetch("puppet.splaylimit", 30))
         @puppet_splay = @config.pluginconf.fetch("puppet.splay", "true")
+
+        @puppet_agent = Util::PuppetAgentMgr.manager(configfile, @puppet_service)
+      end
+
+      def run(command, options)
+        if MCollective::Util.windows?
+          require 'win32/process'
+          # If creating the process doesn't outright fail, assume everything
+          # was okay. The caller wants to know our exit code, so we'll just use
+          # 0 or 1.
+          begin
+            Process.create(:command_line => command, :creation_flags => Process::CREATE_NO_WINDOW)
+            0
+          rescue Process::Error => e
+            1
+          end
+        else
+          super
+        end
       end
 
       action "disable" do
@@ -128,6 +147,7 @@ module MCollective
         args[:server] = request[:server] if request[:server]
         args[:tags] = request[:tags].split(",").map{|t| t.strip} if request[:tags]
         args[:ignoreschedules] = request[:ignoreschedules] if request[:ignoreschedules]
+        args[:signal_daemon] = false if MCollective::Util.windows?
 
         # we can only pass splay arguments if the daemon isn't running :(
         unless @puppet_agent.status[:daemon_present]

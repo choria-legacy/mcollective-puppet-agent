@@ -19,6 +19,13 @@ module MCollective
           !disabled?
         end
 
+        # is a background run allowed? by default it's only allowed if the
+        # daemon isn't present but can be overridden
+        def background_run_allowed?
+          !daemon_present?
+        end
+
+
         # seconds since the last catalog was applied
         def since_lastrun
           (Time.now - lastrun).to_i
@@ -172,7 +179,7 @@ module MCollective
             return :signal_running_daemon, clioptions if options[:options_only]
             return signal_running_daemon
           else
-            raise "Cannot run in the background if the daemon is present" if daemon_present?
+            raise "Cannot run in the background if the daemon is present" unless background_run_allowed?
             return :run_in_background, run_in_background(clioptions, false) if options[:options_only]
             return run_in_background(clioptions)
           end

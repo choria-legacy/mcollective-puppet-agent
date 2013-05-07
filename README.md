@@ -57,6 +57,13 @@ agent will be able to manage - you cannot specify both a blacklist and a whiteli
 If you supply the value *none* to *type_whitelist* it will have the effect of denying
 all resource management - this is the default.
 
+On Windows, the name of the Puppet service is needed to determine if the
+service is running. The service name varies between Puppet open source and
+Puppet Enterprise (puppet vs. pe-puppet); the default is puppet, but it can be
+explicitly specified:
+
+    plugin.puppet.windows_service = puppet
+
 ## Usage
 ### Running Puppet
 
