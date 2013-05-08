@@ -4,7 +4,7 @@ metadata :name => "puppet",
          :license => "ASL2.0",
          :version => "1.6.0",
          :url => "http://puppetlabs.com",
-         :timeout => 5
+         :timeout => 20
 
 requires :mcollective => "2.2.1"
 

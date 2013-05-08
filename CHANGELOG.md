@@ -3,6 +3,7 @@ Changelog
 
 |Release Version|Date|Description|Ticket|
 |---------------|----|-----------|------|
+|1.6.0|2013/05/08|Increase the DDL timeout to better handle slower servers where puppet startup is slow|20618 |
 |1.6.0|2013/05/07|Support controlling Puppet on Windows|19541|
 |1.5.1|2013/03/01|Add a --rerun option to the runall command that loops over the nodes forever|19541|
 |1.5.0|2013/02/22|Improve error message when a resource does not pass validation|19384|
