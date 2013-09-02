@@ -61,6 +61,21 @@ module MCollective
           type_distribution
         end
 
+        # loads the report file and returns log messages grouped by the log levels
+        def last_run_logs
+          logs = {} 
+          report = YAML.load_file(Puppet[:lastrunreport]) if File.exists?(Puppet[:lastrunreport])
+
+          #levels = report.logs.map { |r| r.level }.uniq!
+          levels = Puppet::Util::Log.levels
+
+          levels.each do |level|
+            logs[level.to_s] = report.logs.map { |r| r.level.to_s =~ /#{level.to_s}/ && r.message.chomp }.compact
+          end
+
+          logs
+        end
+
         # loads the summary file and makes sure that some keys are always present
         def load_summary
           summary = {"changes" => {}, "time" => {}, "resources" => {}, "version" => {}, "events" => {}}
