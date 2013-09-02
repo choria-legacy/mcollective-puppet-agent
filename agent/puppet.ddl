@@ -83,6 +83,13 @@ end
 action "last_run_summary", :description => "Get the summary of the last Puppet run" do
     display :always
 
+    input  :parse_log,
+           :description => "Whether or not to parse the logs from last_run_report.yaml",
+           :prompt      => "Parse log from last_run_report.yaml?",
+           :optional    => true,
+           :type        => :boolean,
+           :default     => false
+
     output :out_of_sync_resources,
            :description => "Resources that were not in desired state",
            :display_as  => "Out of Sync Resources",
@@ -112,6 +119,11 @@ action "last_run_summary", :description => "Get the summary of the last Puppet r
            :description => "Total time taken to retrieve and process the catalog",
            :display_as  => "Total Time",
            :default     => 0
+
+    output :logs,
+           :description => "Log lines from the last Puppet run",
+           :display_as  => "Last Run Logs",
+           :default     => {}
 
     output :lastrun,
            :description => "When the Agent last applied a catalog in local time",
