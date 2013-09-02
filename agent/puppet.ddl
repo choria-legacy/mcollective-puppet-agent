@@ -113,6 +113,11 @@ action "last_run_summary", :description => "Get the summary of the last Puppet r
            :display_as  => "Total Time",
            :default     => 0
 
+    output :logs,
+           :description => "Log lines from the last Puppet run",
+           :display_as  => "Last Run Logs",
+           :default     => {}
+
     output :lastrun,
            :description => "When the Agent last applied a catalog in local time",
            :display_as  => "Last Run",

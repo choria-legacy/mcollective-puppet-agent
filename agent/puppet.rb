@@ -70,6 +70,7 @@ module MCollective
         reply[:since_lastrun] = Integer(Time.now.to_i - reply[:lastrun])
         reply[:config_version] = summary["version"].fetch("config", "unknown")
         reply[:summary] = summary
+        reply[:logs] = @puppet_agent.last_run_logs
       end
 
       action "status" do
