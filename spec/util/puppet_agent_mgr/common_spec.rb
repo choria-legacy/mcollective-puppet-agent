@@ -245,6 +245,34 @@ module MCollective::Util
         end
       end
 
+      describe "#last_run_logs" do
+        it "should return a default structure when no file is found" do
+          Puppet.expects(:[]).with(:lastrunreport).returns("lastrunreport")
+
+          Common.last_run_logs.should == {"info" => [],
+                                          "err"  => [],
+                                          "debug" => [],
+                                          "warning" => [],
+                                          "crit" => [],
+                                          "alert" => [],
+                                          "emerg" => [],
+                                          "notice" => []}
+        end
+
+        it "should return log results if the file is found" do
+          yamlfile = File.expand_path(File.join(File.dirname(__FILE__), "..", "..", "fixtures", "last_run_report.yaml"))
+          
+          Common.last_run_logs.should == {"info" => ["Info level message"],
+                                          "err"  => ["Err level message"],
+                                          "debug" => ["Debug level message"],
+                                          "warning" => ["Warning level message"],
+                                          "crit" => ["Crit level message"],
+                                          "alert" => "Alert level message"[],
+                                          "emerg" => ["Emerg level message"],
+                                          "notice" => ["Notice level message"]}
+        end
+      end
+
       describe "#load_summary" do
         it "should return a default structure when no file is found" do
           Puppet.expects(:[]).with(:lastrunfile).returns("lastrunfile")
