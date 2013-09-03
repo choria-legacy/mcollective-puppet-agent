@@ -1,4 +1,4 @@
----
+--- !ruby/object:Puppet::Transaction::Report
   logs:
     - !ruby/object:Puppet::Util::Log
       level: !ruby/sym notice
