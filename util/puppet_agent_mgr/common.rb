@@ -66,11 +66,10 @@ module MCollective
           logs = {} 
           report = YAML.load_file(Puppet[:lastrunreport]) if File.exists?(Puppet[:lastrunreport])
 
-          #levels = report.logs.map { |r| r.level }.uniq!
           levels = Puppet::Util::Log.levels
 
           levels.each do |level|
-            logs[level.to_s] = report.logs.map { |r| r.level.to_s =~ /#{level.to_s}/ && r.message.chomp }.compact
+            logs[level.to_s] = report.logs.select { |r| r.level == level }.map { |r| r.message.chomp }
           end
 
           logs
