@@ -1,0 +1,13 @@
+---
+language: ruby
+bundler_args: --without development
+script: "bundle exec rake test SPEC_OPTS='--format documentation'"
+rvm:
+  - 1.8.7
+  - 1.9.3
+env:
+  matrix:
+    - MCOLLECTIVE_GEM_VERSION ="~> 2.2.0"
+    - MCOLLECTIVE_GEM_VERSION ="~> 2.3.0"
+notifications:
+  email: false
