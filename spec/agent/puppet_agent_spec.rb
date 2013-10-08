@@ -210,8 +210,10 @@ describe "puppet agent" do
                  "version"=>{"config"=>1350376829, "puppet"=>"3.0.0"},
                  "resources"=>{"failed_to_restart"=>0, "changed"=>1, "failed"=>0, "restarted"=>0, "scheduled"=>0, "out_of_sync"=>1, "skipped"=>6, "total"=>8},
                  "time"=>{"filebucket"=>0.000144, "last_run"=>1350376830, "config_retrieval"=>0.148587, "notify"=>0.001058, "total"=>0.149789}}
+      logs = {}
 
       @manager.expects(:load_summary).returns(summary)
+      @manager.expects(:last_run_logs).returns(logs)
       @manager.expects(:managed_resource_type_distribution).returns({"File" => 1, "Exec" => 2})
 
       result = @agent.call(:last_run_summary)
@@ -226,6 +228,7 @@ describe "puppet agent" do
       result[:data][:since_lastrun].should == Integer((t - 1350376830))
       result[:data][:config_version].should == 1350376829
       result[:data][:summary].should == summary
+      result[:data][:logs].should == logs
       result[:data][:type_distribution].should == {"File" => 1, "Exec" => 2}
     end
   end
