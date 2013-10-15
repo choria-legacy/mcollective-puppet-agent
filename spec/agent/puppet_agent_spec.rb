@@ -262,8 +262,11 @@ describe "puppet agent" do
       result.should have_data_items(:summary => "Puppet is disabled: 'locked by rspec'")
     end
 
-    it "should not set splay options when force is given" do
-      @manager.expects(:runonce!).with({:options_only=>true}).returns([:signal_running_daemon, []])
+    it "should set splay option to false when force is given" do
+      @manager.expects(:runonce!).with({
+        :options_only => true,
+        :splay => false,
+      }).returns([:signal_running_daemon, []])
       result = @agent.call(:runonce, :force => true)
       result.should be_successful
     end
