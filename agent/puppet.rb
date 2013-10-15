@@ -151,7 +151,11 @@ module MCollective
 
         # we can only pass splay arguments if the daemon isn't running :(
         unless @puppet_agent.status[:daemon_present]
-          unless request[:force] == true
+          if request[:force] == true
+            # forcing implies --no-splay
+            args[:splay] = false
+          else
+            # respect splay options
             args[:splay] = request[:splay] if request.include?(:splay)
             args[:splaylimit] = request[:splaylimit] if request.include?(:splaylimit)
 
