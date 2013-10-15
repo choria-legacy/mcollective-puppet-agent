@@ -81,7 +81,7 @@ if defined?(RSpec::Core::RakeTask)
       t.pattern = 'spec/**/*_spec.rb'
     end
 
-    tmp_load_path = $LOAD_PATH.map { |f| f.shellescape }.join(" -I ")
+    tmp_load_path = $LOAD_PATH.map { |f| "-I #{f.shellescape}" }.join(" ")
     t.rspec_opts = tmp_load_path + " " + File.read("#{specdir}/spec.opts").chomp
   end
 end
