@@ -213,7 +213,7 @@ describe "puppet agent" do
       logs = {}
 
       @manager.expects(:load_summary).returns(summary)
-      @manager.expects(:last_run_logs).returns(logs)
+      @manager.stubs(:last_run_logs).returns(logs)
       @manager.expects(:managed_resource_type_distribution).returns({"File" => 1, "Exec" => 2})
 
       result = @agent.call(:last_run_summary)
