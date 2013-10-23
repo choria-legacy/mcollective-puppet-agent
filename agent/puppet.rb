@@ -57,10 +57,11 @@ module MCollective
       end
 
       action "last_run_summary" do
-        fetch_last_run_logs = !!@config.pluginconf.fetch("puppet.fetch_last_run_logs","false").match(/^1|true|yes/)
+        parse_log = request[:parse_log] || false
+        
         summary = @puppet_agent.load_summary
         logs = {}
-        logs = @puppet_agent.last_run_logs if fetch_last_run_logs
+        logs = @puppet_agent.last_run_logs if parse_log
 
         reply[:type_distribution] = @puppet_agent.managed_resource_type_distribution
         reply[:out_of_sync_resources] = summary["resources"].fetch("out_of_sync", 0)
