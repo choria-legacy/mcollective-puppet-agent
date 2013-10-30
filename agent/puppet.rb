@@ -57,7 +57,11 @@ module MCollective
       end
 
       action "last_run_summary" do
+        parse_log = request[:parse_log] || false
+        
         summary = @puppet_agent.load_summary
+        logs = {}
+        logs = @puppet_agent.last_run_logs if parse_log
 
         reply[:type_distribution] = @puppet_agent.managed_resource_type_distribution
         reply[:out_of_sync_resources] = summary["resources"].fetch("out_of_sync", 0)
@@ -70,6 +74,7 @@ module MCollective
         reply[:since_lastrun] = Integer(Time.now.to_i - reply[:lastrun])
         reply[:config_version] = summary["version"].fetch("config", "unknown")
         reply[:summary] = summary
+        reply[:logs] = logs
       end
 
       action "status" do

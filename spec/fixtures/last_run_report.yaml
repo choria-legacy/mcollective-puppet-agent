@@ -1,0 +1,58 @@
+--- !ruby/object:Puppet::Transaction::Report
+  logs:
+    - !ruby/object:Puppet::Util::Log
+      level: !ruby/sym notice
+      time: 2013-09-03 14:00:41.473620 +00:00
+      tags:
+        - notice
+      source: Puppet
+      message: "Notice level message"
+    - !ruby/object:Puppet::Util::Log
+      level: !ruby/sym err
+      time: 2013-09-03 14:00:41.473620 +00:00
+      tags:
+        - err
+      source: Puppet
+      message: "Err level message"
+    - !ruby/object:Puppet::Util::Log
+      level: !ruby/sym warning
+      time: 2013-09-03 14:00:41.473620 +00:00
+      tags:
+        - warning
+      source: Puppet
+      message: "Warning level message"
+    - !ruby/object:Puppet::Util::Log
+      level: !ruby/sym debug
+      time: 2013-09-03 14:00:41.473620 +00:00
+      tags:
+        - debug
+      source: Puppet
+      message: "Debug level message"
+    - !ruby/object:Puppet::Util::Log
+      level: !ruby/sym crit
+      time: 2013-09-03 14:00:41.473620 +00:00
+      tags:
+        - crit
+      source: Puppet
+      message: "Crit level message"
+    - !ruby/object:Puppet::Util::Log
+      level: !ruby/sym alert
+      time: 2013-09-03 14:00:41.473620 +00:00
+      tags:
+        - alert
+      source: Puppet
+      message: "Alert level message"
+    - !ruby/object:Puppet::Util::Log
+      level: !ruby/sym info
+      time: 2013-09-03 14:00:41.473620 +00:00
+      tags:
+        - info
+      source: Puppet
+      message: "Info level message"
+    - !ruby/object:Puppet::Util::Log
+      level: !ruby/sym emerg
+      time: 2013-09-03 14:00:41.473620 +00:00
+      tags:
+        - emerg
+      source: Puppet
+      message: "Emerg level message"

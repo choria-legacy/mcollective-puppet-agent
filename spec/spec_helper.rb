@@ -15,9 +15,45 @@ require 'json'
 module Puppet
   class Type;end
   class Transaction;end
-  class Transaction::Report;end
+  class Transaction::Report
+   attr_reader :logs
+   def <<(msg)
+     @logs << msg
+     self
+   end
+   def initialize
+     @logs = []
+   end
+   def initialize_from_hash(data)
+     @logs = data['logs'].map do |record|
+       Puppet::Util::Log.from_pson(record)
+     end
+   end
+  end
   class Util;end
-  class Util::Log;end
+  class Util::Log
+    attr_reader :level, :message
+    @loglevel = 2
+    @levels = [:debug,:info,:notice,:warning,:err,:alert,:emerg,:crit]
+    def self.level
+      @levels[@loglevel]
+    end
+    def self.levels
+      @levels.dup
+    end
+    def self.from_pson(data)
+      obj = allocate
+      obj.initialize_from_hash(data)
+      obj
+    end
+    def self.level=(level)
+      level = level.intern unless level.is_a?(Symbol)
+
+      raise Puppet::DevError, "Invalid loglevel #{level}" unless @levels.include?(level)
+
+      @loglevel = @levels.index(level)
+    end
+  end
   class Resource;end
   class Resource::Catalog;end
 
