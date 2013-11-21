@@ -59,6 +59,12 @@ module MCollective
       action "last_run_summary" do
         summary = @puppet_agent.load_summary
 
+        if request[:parse_log]
+          reply[:logs] = @puppet_agent.last_run_logs
+        else
+          reply[:logs] = {}
+        end
+
         reply[:type_distribution] = @puppet_agent.managed_resource_type_distribution
         reply[:out_of_sync_resources] = summary["resources"].fetch("out_of_sync", 0)
         reply[:failed_resources] = summary["resources"].fetch("failed", 0)
