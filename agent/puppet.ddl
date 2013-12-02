@@ -233,7 +233,7 @@ action "runonce", :description => "Invoke a single Puppet run" do
           :maxlength   => 120
 
     input :noop,
-          :prompt      => "Noop",
+          :prompt      => "No-op",
           :description => "Do a Puppet dry run",
           :type        => :boolean,
           :optional    => true
