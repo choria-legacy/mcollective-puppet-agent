@@ -1,9 +1,15 @@
+RAKE_ROOT = File.expand_path(File.dirname(__FILE__))
 specdir = File.join([File.dirname(__FILE__), "spec"])
 
 require 'rake'
 begin
   require 'rspec/core/rake_task'
   require 'mcollective'
+rescue LoadError
+end
+
+begin
+  load File.join(RAKE_ROOT, 'ext', 'packaging.rake')
 rescue LoadError
 end
 
