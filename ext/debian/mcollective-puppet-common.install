@@ -1,0 +1,4 @@
+agent/*.ddl usr/share/mcollective/plugins/mcollective/agent/
+data/* usr/share/mcollective/plugins/mcollective/data/
+util/* usr/share/mcollective/plugins/mcollective/util/
+validator/* usr/share/mcollective/plugins/mcollective/validator/
