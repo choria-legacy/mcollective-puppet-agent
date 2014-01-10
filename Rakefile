@@ -3,6 +3,7 @@ specdir = File.join([File.dirname(__FILE__), "spec"])
 require 'rake'
 begin
   require 'rspec/core/rake_task'
+  require 'mcollective'
 rescue LoadError
 end
 
@@ -71,7 +72,7 @@ task :build do
   end
 end
 
-if defined?(RSpec::Core::RakeTask)
+if defined?(RSpec::Core::RakeTask) and defined?(MCollective)
   desc "Run agent and application tests"
   RSpec::Core::RakeTask.new(:test) do |t|
     require "#{specdir}/spec_helper.rb"
