@@ -30,7 +30,18 @@ module MCollective
             1
           end
         else
-          super
+          # On Unices double fork and exec to run puppet in a disowned child
+          child = fork {
+            grandchild = fork {
+              exec command
+            }
+            if grandchild != nil
+              Process.detach(grandchild)
+            end
+          }
+          return 1 if child.nil?
+          Process.detach(child)
+          return 0
         end
       end
 
@@ -184,14 +195,15 @@ module MCollective
         command = [@puppet_command].concat(options).join(" ")
 
         case run_method
-          when :run_in_background
-            Log.debug("Initiating a background puppet agent run using the command: %s" % command)
+          when :run_in_foreground
+            Log.debug("Initiating a puppet agent run using the command: %s" % command)
+
             exitcode = run(command, :stdout => :summary, :stderr => :summary, :chomp => true)
 
             unless exitcode == 0
               reply.fail!(reply[:summary] = "Puppet command '%s' had exit code %d, expected 0" % [command, exitcode])
             else
-              reply[:summary] = "Started a background Puppet run using the '%s' command" % command
+              reply[:summary] = "Started a Puppet run using the '%s' command" % command
             end
 
           when :signal_running_daemon

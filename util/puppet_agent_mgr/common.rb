@@ -195,9 +195,8 @@ module MCollective
             return :signal_running_daemon, clioptions if options[:options_only]
             return signal_running_daemon
           else
-            raise "Cannot run in the background if the daemon is present" unless background_run_allowed?
-            return :run_in_background, run_in_background(clioptions, false) if options[:options_only]
-            return run_in_background(clioptions)
+            raise "Cannot run when the agent is running" if applying?
+            return :run_in_foreground, run_in_foreground(clioptions, false)
           end
         end
 

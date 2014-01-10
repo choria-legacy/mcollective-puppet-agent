@@ -92,12 +92,6 @@ module MCollective::Util
         end
       end
 
-      describe "#run_in_foreground" do
-        it "should not be supported" do
-          expect { Windows.run_in_foreground([]) }.to raise_error(/Running puppet in the foreground is not supported on Windows/)
-        end
-      end
-
       describe "#signal_running_daemon" do
         it "should not be supported" do
           expect { Windows.signal_running_daemon }.to raise_error(/Signalling the puppet daemon is not supported on Windows/)
