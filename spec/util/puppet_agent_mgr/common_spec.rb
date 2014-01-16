@@ -134,42 +134,39 @@ module MCollective::Util
           Common.runonce!(:options_only => true).should == [:signal_running_daemon, []]
         end
 
-        it "should not signal a daemon when not allowed and it is idling" do
+        it "should do a foreground run when signalling a daemon is not allowed" do
           Common.stubs(:applying?).returns(false)
           Common.stubs(:disabled?).returns(false)
           Common.expects(:idling?).returns(true).twice
-          Common.expects(:daemon_present?).returns(true)
 
-          Common.expects(:run_in_foreground).never
+          Common.expects(:run_in_foreground)
           Common.expects(:signal_running_daemon).never
           Common.expects(:run_in_background).never
 
-          expect { Common.runonce!(:signal_daemon => false) }.to raise_error(/Cannot run.+if the daemon is present/)
+          Common.runonce!(:signal_daemon => false)
         end
 
-        it "should do a background run if the daemon is not present" do
+        it "should do a foreground run if asked to run" do
           Common.stubs(:applying?).returns(false)
           Common.stubs(:disabled?).returns(false)
           Common.expects(:idling?).returns(false).twice
-          Common.expects(:daemon_present?).returns(false)
 
-          Common.expects(:run_in_foreground).never
+          Common.expects(:run_in_background).never
           Common.expects(:signal_running_daemon).never
-          Common.expects(:run_in_background)
+          Common.expects(:run_in_foreground)
 
           Common.runonce!
         end
 
-        it "should support returning background run arguments only" do
+        it "should support returning foreground run arguments only" do
           Common.stubs(:applying?).returns(false)
           Common.stubs(:disabled?).returns(false)
           Common.expects(:idling?).returns(false).twice
-          Common.expects(:daemon_present?).returns(false)
 
-          Common.expects(:run_in_foreground).never
+          Common.expects(:run_in_background).never
           Common.expects(:signal_running_daemon).never
 
-          Common.runonce!(:options_only => true).should ==  [:run_in_background, ["--onetime", "--daemonize", "--color=false"]]
+          Common.runonce!(:options_only => true).should ==  [:run_in_foreground, ["--test", "--color=false"]]
         end
       end
 

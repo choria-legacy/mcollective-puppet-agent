@@ -352,7 +352,7 @@ describe "puppet agent" do
     end
 
     it "should support running puppet with the given arguments" do
-      @manager.expects(:runonce!).with({:options_only=>true, :splay=>true, :splaylimit=>30}).returns([:run_in_background, ["--rspec"]])
+      @manager.expects(:runonce!).with({:options_only=>true, :splay=>true, :splaylimit=>30}).returns([:run_in_foreground, ["--rspec"]])
       @agent.expects(:run).with("puppet agent --rspec", :stdout => :summary, :stderr => :summary, :chomp => true).returns(0)
 
       result = @agent.call(:runonce)
@@ -360,7 +360,7 @@ describe "puppet agent" do
     end
 
     it "should fail with a friendly message if puppet returns non zero" do
-      @manager.expects(:runonce!).with({:options_only=>true, :splay=>true, :splaylimit=>30}).returns([:run_in_background, ["--rspec"]])
+      @manager.expects(:runonce!).with({:options_only=>true, :splay=>true, :splaylimit=>30}).returns([:run_in_foreground, ["--rspec"]])
       @agent.expects(:run).with("puppet agent --rspec", :stdout => :summary, :stderr => :summary, :chomp => true).returns(1)
 
       result = @agent.call(:runonce)

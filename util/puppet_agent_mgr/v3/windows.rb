@@ -57,6 +57,17 @@ module MCollective
           Process.create(:command_line => command, :creation_flags => Process::CREATE_NO_WINDOW)
         end
 
+        def run_in_foreground(clioptions, execute=true)
+          require 'win32/process'
+          options =["--onetime", "--color=false"].concat(clioptions)
+
+          return options unless execute
+
+          command = "puppet.bat agent #{options.join(' ')}"
+
+          Process.create(:command_line => command, :creation_flags => Process::CREATE_NO_WINDOW)
+        end
+
         def has_process_for_pid?(pid)
           return false if pid.nil? or pid.empty?
 
