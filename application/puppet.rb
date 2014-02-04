@@ -41,11 +41,7 @@ END_OF_USAGE
   option :noop,
          :arguments   => ["--noop"],
          :description => "Do a noop run",
-         :type        => :bool
-
-  option :no_noop,
-         :arguments   => ["--no-noop"],
-         :description => "Do a run with noop disabled",
+         :default     => false,
          :type        => :bool
 
   option :environment,
@@ -56,11 +52,7 @@ END_OF_USAGE
   option :splay,
          :arguments   => ["--splay"],
          :description => "Splay the run by up to splaylimit seconds",
-         :type        => :bool
-
-  option :no_splay,
-         :arguments   => ["--no-splay"],
-         :description => "Do a run with splay disabled",
+         :default     => false,
          :type        => :bool
 
   option :splaylimit,
@@ -120,9 +112,6 @@ END_OF_USAGE
       raise_message(9) unless configuration[:type]
       raise_message(10) unless configuration[:name]
     end
-
-    configuration[:noop] = false if configuration[:no_noop]
-    configuration[:splay] = false if configuration[:no_splay]
   end
 
   def raise_message(message, *args)
