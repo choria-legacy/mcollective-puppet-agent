@@ -27,7 +27,7 @@ To use this agent you need:
 
 ## Agent Installation
 
-Follow the basic [plugin install guide](http://projects.puppetlabs.com/projects/mcollective-plugins/wiki/InstalingPlugins)
+Follow the basic [plugin install guide](http://docs.puppetlabs.com/mcollective/deploy/plugins.html)
 
 ## Configuring the agent
 
