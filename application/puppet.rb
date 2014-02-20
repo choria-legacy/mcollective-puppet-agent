@@ -121,8 +121,8 @@ END_OF_USAGE
       raise_message(10) unless configuration[:name]
     end
 
-    configuration[:noop] = false if configuration[:no_noop]
-    configuration[:splay] = false if configuration[:no_splay]
+    configuration[:noop] = false if configuration.include?(:no_noop)
+    configuration[:splay] = false if configuration.include?(:no_splay)
   end
 
   def raise_message(message, *args)
