@@ -66,7 +66,7 @@ module MCollective::Util
         it "should return false if the lockfile is stale" do
           Windows.expects(:disabled?).returns(false)
           File.expects(:read).with("agent_catalog_run_lockfile").returns("1")
-          Process.stubs(:kill).with(0, 1).raises(Errno::ESRCH)
+          ::Process.stubs(:kill).with(0, 1).raises(Errno::ESRCH)
 
           Windows.applying?.should == false
         end

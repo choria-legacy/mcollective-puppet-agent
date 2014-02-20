@@ -76,7 +76,7 @@ module MCollective::Util
         it "should check if the process is present and send USR1 if present" do
           File.expects(:read).with("pidfile").returns("1")
           Unix.expects(:has_process_for_pid?).with("1").returns(true)
-          Process.expects(:kill).with("USR1", 1)
+          ::Process.expects(:kill).with("USR1", 1)
 
           Unix.signal_running_daemon
         end

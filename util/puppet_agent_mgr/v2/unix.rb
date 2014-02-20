@@ -33,7 +33,7 @@ module MCollective
 
           if has_process_for_pid?(pid)
             begin
-              Process.kill("USR1", Integer(pid))
+              ::Process.kill("USR1", Integer(pid))
             rescue Exception => e
               raise "Failed to signal the puppet agent at pid %s: %s" % [pid, e.to_s]
             end
@@ -43,7 +43,7 @@ module MCollective
         end
 
         def has_process_for_pid?(pid)
-          !!Process.kill(0, Integer(pid)) rescue false
+          !!::Process.kill(0, Integer(pid)) rescue false
         end
       end
     end
