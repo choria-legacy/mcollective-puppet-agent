@@ -11,7 +11,7 @@ end
 mcollective_version = ENV['MCOLLECTIVE_GEM_VERSION']
 
 if mcollective_version
-  gem 'mcollective', mcollective_version, :require => false
+  gem 'mcollective-client', mcollective_version, :require => false
 else
-  gem 'mcollective', :require => false
+  gem 'mcollective-client', :require => false
 end
