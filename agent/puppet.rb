@@ -24,9 +24,9 @@ module MCollective
           # was okay. The caller wants to know our exit code, so we'll just use
           # 0 or 1.
           begin
-            Process.create(:command_line => command, :creation_flags => Process::CREATE_NO_WINDOW)
+            ::Process.create(:command_line => command, :creation_flags => ::Process::CREATE_NO_WINDOW)
             0
-          rescue Process::Error => e
+          rescue ::Process::Error => e
             1
           end
         else
@@ -36,11 +36,11 @@ module MCollective
               exec command
             }
             if grandchild != nil
-              Process.detach(grandchild)
+              ::Process.detach(grandchild)
             end
           }
           return 1 if child.nil?
-          Process.detach(child)
+          ::Process.detach(child)
           return 0
         end
       end
