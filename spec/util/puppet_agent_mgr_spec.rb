@@ -1,6 +1,10 @@
 #!/usr/bin/env rspec
 
 require 'spec_helper'
+require File.join(File.dirname(__FILE__), File.join('../..', 'util', 'puppet_agent_mgr.rb'))
+require File.join(File.dirname(__FILE__), File.join('../..', 'util', 'puppet_agent_mgr', 'common.rb'))
+require File.join(File.dirname(__FILE__), File.join('../..', 'util', 'puppet_agent_mgr', 'v2', 'manager.rb'))
+require File.join(File.dirname(__FILE__), File.join('../..', 'util', 'puppet_agent_mgr', 'v3', 'manager.rb'))
 
 module MCollective::Util
   describe PuppetAgentMgr do
