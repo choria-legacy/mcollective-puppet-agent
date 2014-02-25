@@ -78,19 +78,15 @@ task :build do
   end
 end
 
-if defined?(RSpec::Core::RakeTask) and defined?(MCollective)
-  desc "Run agent and application tests"
-  RSpec::Core::RakeTask.new(:test) do |t|
-    require "#{specdir}/spec_helper.rb"
-    if ENV["TARGETDIR"]
-      t.pattern = "#{File.expand_path(ENV["TARGETDIR"])}/spec/**/*_spec.rb"
-    else
-      t.pattern = 'spec/**/*_spec.rb'
-    end
-
-    tmp_load_path = $LOAD_PATH.map { |f| "-I #{f.shellescape}" }.join(" ")
-    t.rspec_opts = tmp_load_path + " " + File.read("#{specdir}/spec.opts").chomp
+desc "Run agent and application tests"
+task :test do
+  require "#{specdir}/spec_helper.rb"
+  if ENV["TARGETDIR"]
+    test_pattern = "#{File.expand_path(ENV["TARGETDIR"])}/spec"
+  else
+    test_pattern = 'spec'
   end
+  sh "rspec #{test_pattern}"
 end
 
 task :default => :test
