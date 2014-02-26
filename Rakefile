@@ -1,8 +1,15 @@
+RAKE_ROOT = File.expand_path(File.dirname(__FILE__))
 specdir = File.join([File.dirname(__FILE__), "spec"])
 
 require 'rake'
 begin
   require 'rspec/core/rake_task'
+  require 'mcollective'
+rescue LoadError
+end
+
+begin
+  load File.join(RAKE_ROOT, 'ext', 'packaging.rake')
 rescue LoadError
 end
 
@@ -71,19 +78,15 @@ task :build do
   end
 end
 
-if defined?(RSpec::Core::RakeTask)
-  desc "Run agent and application tests"
-  RSpec::Core::RakeTask.new(:test) do |t|
-    require "#{specdir}/spec_helper.rb"
-    if ENV["TARGETDIR"]
-      t.pattern = "#{File.expand_path(ENV["TARGETDIR"])}/spec/**/*_spec.rb"
-    else
-      t.pattern = 'spec/**/*_spec.rb'
-    end
-
-    tmp_load_path = $LOAD_PATH.map { |f| "-I #{f.shellescape}" }.join(" ")
-    t.rspec_opts = tmp_load_path + " " + File.read("#{specdir}/spec.opts").chomp
+desc "Run agent and application tests"
+task :test do
+  require "#{specdir}/spec_helper.rb"
+  if ENV["TARGETDIR"]
+    test_pattern = "#{File.expand_path(ENV["TARGETDIR"])}/spec/**/*_spec.rb"
+  else
+    test_pattern = 'spec/**/*_spec.rb'
   end
+  sh "rspec #{Dir.glob(test_pattern).sort.join(' ')}"
 end
 
 task :default => :test

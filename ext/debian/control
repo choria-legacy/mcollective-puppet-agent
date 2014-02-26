@@ -1,0 +1,22 @@
+Source: mcollective-puppet
+Homepage: https://github.com/puppetlabs/mcollective-puppet-agent
+Section: utils
+Priority: extra
+Maintainer: Puppet Labs
+Build-Depends: cdbs, debhelper
+Standards-Version: 3.8.0
+
+Package: mcollective-puppet-agent
+Architecture: all
+Depends: mcollective-puppet-common(= ${binary:Version})
+Description: Manage the puppet agent with MCollective
+
+Package: mcollective-puppet-client
+Architecture: all
+Depends: mcollective-puppet-common(= ${binary:Version})
+Description: Manage the puppet agent with MCollective
+
+Package: mcollective-puppet-common
+Architecture: all
+Depends: mcollective-common(>= 2.2.1)
+Description: Manage the puppet agent with MCollective

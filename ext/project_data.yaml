@@ -1,0 +1,20 @@
+---
+project: 'mcollective-puppet'
+author: 'Puppet Labs'
+email: 'info@puppetlabs.com'
+homepage: 'https://github.com/puppetlabs/mcollective-puppet-agent'
+summary: 'Manage the puppet agent with MCollective'
+description: 'Manage the puppet agent with MCollective'
+# files and gem_files are space separated lists
+files:
+  - agent
+  - aggregate
+  - application
+  - data
+  - ext
+  - util
+  - validator
+# List of packaging related templates to evaluate before the tarball is packed
+templates:
+  - "ext/redhat/mcollective-puppet.spec.erb"
+  - "ext/debian/changelog.erb"
