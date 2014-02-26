@@ -82,11 +82,11 @@ desc "Run agent and application tests"
 task :test do
   require "#{specdir}/spec_helper.rb"
   if ENV["TARGETDIR"]
-    test_pattern = "#{File.expand_path(ENV["TARGETDIR"])}/spec"
+    test_pattern = "#{File.expand_path(ENV["TARGETDIR"])}/spec/**/*_spec.rb"
   else
-    test_pattern = 'spec'
+    test_pattern = 'spec/**/*_spec.rb'
   end
-  sh "rspec #{test_pattern}"
+  sh "rspec #{Dir.glob(test_pattern).sort.join(' ')}"
 end
 
 task :default => :test
