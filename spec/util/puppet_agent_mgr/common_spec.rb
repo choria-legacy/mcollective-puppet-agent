@@ -118,7 +118,7 @@ module MCollective::Util
           Common.expects(:run_in_background).never
           Common.expects(:signal_running_daemon).never
 
-          Common.runonce!(:foreground_run => true, :options_only => true).should == [:foreground_run, ["--test", "--color=false"]]
+          Common.runonce!(:foreground_run => true, :options_only => true).should == [:foreground_run, ["--onetime","--no-daemonize","--show_diff","--verbose","--color=false"]]
         end
 
         it "should support sending a signal to the daemon when it is idling" do
@@ -166,7 +166,7 @@ module MCollective::Util
           Common.expects(:run_in_background).never
           Common.expects(:signal_running_daemon).never
 
-          Common.runonce!(:options_only => true).should ==  [:run_in_foreground, ["--test", "--color=false"]]
+          Common.runonce!(:options_only => true).should ==  [:run_in_foreground, ["--onetime","--no-daemonize","--show_diff","--verbose", "--color=false"]]
         end
       end
 

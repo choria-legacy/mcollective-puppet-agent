@@ -89,7 +89,7 @@ module MCollective
         end
 
         def run_in_foreground(clioptions, execute=true)
-          options = ["--test", "--color=false"].concat(clioptions)
+          options = ["--onetime","--no-daemonize", "--color=false","--show_diff","--verbose"].concat(clioptions)
 
           return options unless execute
 
@@ -150,7 +150,7 @@ module MCollective
 
         # do a run based on the following options:
         #
-        # :foreground_run  - runs in the foreground a --test run
+        # :foreground_run  - runs in the foreground a --onetime --no-daemonize --show_diff --verbose run
         # :signal_daemon   - if the daemon is running, sends it USR1 to wake it up
         # :noop            - enables or disabled noop mode based on true/false
         # :tags            - an array of tags to limit the run to
