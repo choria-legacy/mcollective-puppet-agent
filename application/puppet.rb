@@ -178,6 +178,8 @@ END_OF_USAGE
       end
     end
 
+    return '' if values.empty?
+
     min = values.min
     max = values.max
 
