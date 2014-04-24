@@ -139,6 +139,20 @@ module MCollective
           @app.expects(:spark).with([2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0]).returns("rspec")
           @app.sparkline_for_field(results, :rspec, 11).should == "rspec  min: 10.0   max: 21.0  "
         end
+
+        it 'should return an empty string with bad data to extract from' do
+          results = []
+          (10...22).each do |c|
+            results << {:statuscode => 1, :data => {:rspec => c}}
+          end
+
+          @app.sparkline_for_field(results, :rspec).should == ''
+        end
+
+        it 'should return an empty string with no data to extract' do
+          results = []
+          @app.sparkline_for_field(results, :rspec).should == ''
+        end
       end
 
       describe "#spark" do
