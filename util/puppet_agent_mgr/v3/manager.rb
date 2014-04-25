@@ -23,7 +23,10 @@ module MCollective
 
             Puppet.settings.initialize_global_settings(args)
             Puppet.settings.initialize_app_defaults(Puppet::Settings.app_defaults_for_run_mode(Puppet.run_mode))
-            Puppet.push_context(Puppet.base_context(Puppet.settings))
+            # This check is to keep backwards compatibility with Puppet versions < 3.5.0
+            if (Puppet.respond_to?(:base_context) && Puppet.respond_to?(:push_context))
+              Puppet.push_context(Puppet.base_context(Puppet.settings))
+            end
           end
         end
 
