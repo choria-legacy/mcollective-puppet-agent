@@ -3,6 +3,8 @@ Changelog
 
 |Release Version|Date|Description|Ticket|
 |---------------|----|-----------|------|
+|1.7.2|2014/04/25|Remove implicit requirement on puppet 3.5.x|MCOP-25|
+|1.7.2|2014/04/24|Fix puppet-agent application backtrace when no results are returned|MCOP-26|
 |1.7.1|2014/04/23|MCollective service plugin not working with puppet 3.5.x|MCOP-23|
 |1.7.0|2014/02/20|Fully-qualify uses of Process to avoid clashes with process agent|#13|
 |1.7.0|2014/02/20|Fix --no-noop and --no-splay under MCollective 2.3.x and 2.4.x|MCOP-5|
