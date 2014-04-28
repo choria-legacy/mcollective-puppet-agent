@@ -262,4 +262,9 @@ action "runonce", :description => "Invoke a single Puppet run" do
            :description => "Summary of command run",
            :display_as  => "Summary",
            :default     => ""
+
+    output :initiated_at,
+           :description => "Timestamp of when the runonce command was issues",
+           :display_as  => "Initiated at",
+           :default     => 0
 end

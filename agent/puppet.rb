@@ -214,6 +214,7 @@ module MCollective
           else
             reply.fail!(reply[:summary] = "Do not know how to do puppet runs using method %s" % run_method)
         end
+        reply[:initiated_at] = Time.now.to_i
       end
     end
   end

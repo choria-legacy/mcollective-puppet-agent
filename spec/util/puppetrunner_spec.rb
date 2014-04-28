@@ -84,13 +84,33 @@ module MCollective::Util
     end
 
     describe "#runhosts" do
-      it "should run each host as quick as it can and only discover when it has to" do
-        @runner.stubs(:wait_for_applying_nodes).returns(3).once
+      before :each do
+        @runner.stubs(:log)
+        @runner.stubs(:sleep)
+      end
+
+      it "should run as many nodes as possible until concurrency has been met" do
+        @runner.instance_variable_set(:@concurrency, 3)
+        @runner.stubs(:find_applying_nodes).returns([])
         @runner.expects(:runhost).with("one")
         @runner.expects(:runhost).with("two")
         @runner.expects(:runhost).with("three")
-        @runner.stubs(:sleep)
         @runner.runhosts(["one", "two", "three"])
+      end
+
+      it "should put a node in the back of the run queue if it has been put in a running state by some other means" do
+        @runner.instance_variable_set(:@concurrency, 1)
+        @runner.stubs(:find_applying_nodes).returns(["one"], [])
+        @runner.expects(:runhost).with("one").once
+        @runner.runhosts(["one"])
+      end
+
+      it "should not start another run if max concurrency has been met" do
+        @runner.instance_variable_set(:@concurrency, 1)
+        @runner.stubs(:find_applying_nodes).returns(["one"], ["one"], [])
+        @runner.expects(:runhost).with("one").once
+        @runner.expects(:sleep).with(1).twice
+        @runner.runhosts(["one"])
       end
     end
 
@@ -113,26 +133,92 @@ module MCollective::Util
       end
     end
 
-    describe "#wait_for_applying_nodes" do
-      it "should discover applying nodes till below concurrency is found" do
-        @runner.client.expects(:compound_filter).with("puppet().applying=true")
-        @runner.client.expects(:reset).times(4)
-        @runner.client.expects(:discover).times(4).returns(["one", "two"], ["one", "two"], ["one", "two"], [])
-
-        @runner.expects(:sleep).times(3)
-        @runner.stubs(:log)
-
-        @runner.wait_for_applying_nodes.should == 2
-      end
-    end
-
     describe "#runhost" do
-      it "should run the node with direct addressing" do
+      before :each do
         @runner.stubs(:log)
+      end
+
+      it "should return 0 when we encounter a older version of the agent on a remote host" do
         @runner.client.expects(:discover).with(:nodes => "rspec")
         @runner.client.expects(:runonce).with(:force => true).returns([{:data => {:summary => "rspec"}}])
         @runner.client.expects(:reset)
-        @runner.runhost("rspec")
+        @runner.runhost("rspec").should == 0
+      end
+
+      it "should return the timestamp of when it was envoked" do
+        @runner.client.expects(:discover).with(:nodes => "rspec")
+        @runner.client.expects(:runonce).with(:force => true).returns([{:data => {:summary => "rspec", :initiated_at => "123"}}])
+        @runner.client.expects(:reset)
+        @runner.runhost("rspec").should == 123
+      end
+    end
+
+    describe "#find_applying_nodes" do
+      let(:data) do
+        [{
+          :data => {
+            :applying => true,
+            :lastrun => 1,
+            :initiated_at => 1
+          },
+          :sender => "host1.example.com"
+        },
+        {
+          :data => {
+            :applying => false,
+            :lastrun => 2,
+            :initiated_at => 1
+          },
+          :sender => "host2.example.com"
+        }]
+      end
+
+      it "should return all the nodes that match the 'applying' state" do
+        @runner.client.stubs(:status).returns(data)
+        @runner.client.stubs(:identity_filter).with("host1.example.com")
+        @runner.find_applying_nodes(["host1.example.com"]).should == [{ :name => "host1.example.com",
+                                                                        :initiated_at => 1,
+                                                                        :checks => 0}]
+      end
+
+      it "should return all the nodes that match the 'asked to run but not yet started' state" do
+        @runner.client.stubs(:status).returns(data)
+        data[0][:data][:applying] = false
+        @runner.client.stubs(:identity_filter).with("host1.example.com")
+        @runner.find_applying_nodes(["host1.example.com"],
+                                    [{:name => "host1.example.com", :initiated_at => 2, :checks => 0}]).should ==
+                                    [{:name => "host1.example.com", :initiated_at => 2, :checks => 1}]
+      end
+
+      it "should return the empty set if nothing is applying" do
+        @runner.client.stubs(:status).returns(data)
+        data[0][:data][:applying] = false
+        @runner.client.stubs(:identity_filter).with("host1.example.com")
+        @runner.client.stubs(:identity_filter).with("host2.example.com")
+        @runner.find_applying_nodes(["host1.example.com", "host2.example.com"],
+                                    [{:name => "host1.example.com", :initiated_at => 1, :checks => 0},
+                                     {:name => "host2.example.com", :initiated_at => 1, :checks => 0}]).should == []
+
+      end
+
+      it "should give a node in the 'asked to run but not yet started' state 5 tries before removing it from the running set" do
+        data[1][:data][:initiated_at] = 3
+        @runner.client.stubs(:status).returns([data[1]])
+        @runner.client.stubs(:identity_filter).with("host2.example.com")
+        @runner.expects(:log).with("Host host2.example.com did not move into an applying state. Skipping.")
+        result = @runner.find_applying_nodes(["host2.example.com"],
+                                    [{:name => "host2.example.com", :initiated_at => 3, :checks => 0}])
+        result.should == [{:name => "host2.example.com", :initiated_at => 3, :checks => 1}]
+        result = @runner.find_applying_nodes(["host2.example.com"], result)
+        result.should == [{:name => "host2.example.com", :initiated_at => 3, :checks => 2}]
+        result = @runner.find_applying_nodes(["host2.example.com"], result)
+        result.should == [{:name => "host2.example.com", :initiated_at => 3, :checks => 3}]
+        result = @runner.find_applying_nodes(["host2.example.com"], result)
+        result.should == [{:name => "host2.example.com", :initiated_at => 3, :checks => 4}]
+        result = @runner.find_applying_nodes(["host2.example.com"], result)
+        result.should == [{:name => "host2.example.com", :initiated_at => 3, :checks => 5}]
+        result = @runner.find_applying_nodes(["host2.example.com"], result)
+        result.should == []
       end
     end
 
