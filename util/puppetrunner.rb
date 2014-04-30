@@ -68,7 +68,6 @@ module MCollective
           # Check if we have room in the running bucket
           if running.size < @concurrency
             # if we have room add another host to the bucket
-            # FIXUP TEST FOR RUNNING
             host = host_list.pop
             # check if host is already in a running state
             if !running.select{ |running_host| running_host[:name] == host }.empty?
