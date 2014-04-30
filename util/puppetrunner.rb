@@ -60,22 +60,33 @@ module MCollective
       end
 
       def runhosts(hosts)
-        runcount = 0
-
-        hosts.each_with_index do |host, count|
-          if runcount == 0
-            hosts_left = hosts.size - count
-            log("%d out of %d hosts left to run in this iteration" % [hosts_left, hosts.size]) if hosts_left > 0 && count > 0
-
-            runcount = wait_for_applying_nodes - 1
+        # copy the host list so we can manipulate it
+        host_list = hosts.clone
+        # determine the state of the network based on the supplied host list
+        running = find_applying_nodes(host_list)
+        while !host_list.empty?
+          # Check if we have room in the running bucket
+          if running.size < @concurrency
+            # if we have room add another host to the bucket
+            # FIXUP TEST FOR RUNNING
+            host = host_list.pop
+            # check if host is already in a running state
+            if !running.select{ |running_host| running_host[:name] == host }.empty?
+              # put it back in the host list if it is, save it for later
+              host_list.push(host)
+            else
+              # kick a host, put it in the running bucket
+              running << {:name => host, :initiated_at => runhost(host), :checks => 0}
+            end
           else
-            runcount -= 1
+            # we are at concurrency, wait a second to give some time for something
+            # to happen
+            sleep 1
+            # determine the state of the network based on the supplied host list
+            running = find_applying_nodes(hosts, running)
           end
-
-          runhost(host)
-
-          sleep 0.5
         end
+        log("Iteration complete. Initiated a Puppet run on #{hosts.size} nodes.")
       end
 
       def runhost(host)
@@ -92,6 +103,7 @@ module MCollective
         rescue
           log("%s returned an unknown result: %s" % [host, result.inspect])
         end
+        result[0][:data][:initiated_at].to_i || 0
       end
 
       def setup
@@ -114,21 +126,44 @@ module MCollective
         @client.discover.clone
       end
 
-      def wait_for_applying_nodes
-        @client.filter["compound"].clear
-        @client.compound_filter("puppet().applying=true")
-
-        loop do
-          @client.reset
-          applying = client.discover.size
-
-          if applying < @concurrency
-            return @concurrency - applying
-          end
-
-          log("Currently %d %s applying the catalog; waiting for less than %d" % [applying, applying > 1 ? "nodes" : "node", @concurrency])
-          sleep 1
+      # Get a list of nodes that are possibly applying
+      def find_applying_nodes(hosts, initiated = [])
+        @client.filter["identity"].clear
+        hosts.each do |host|
+          @client.identity_filter(host)
         end
+
+        initiated_host_names = initiated.map{ |h| h[:name] }
+
+        result = @client.status.map do |r|
+          sender = r[:sender]
+          # check the value of applying as defined in the agent ddl
+          # NOTE: Only using this method can cause a race condition since it
+          # ignores the "asked to run but not yet started" state.
+          if r[:data][:applying] == true
+            if r[:data][:initiated_at]
+              {:name => sender,:initiated_at => r[:data][:initiated_at], :checks => 0}
+            else
+              {:name => sender, :initiated_at => 0, :checks => 0}
+            end
+          else
+            if index = initiated_host_names.index(sender)
+              if initiated[index][:checks] >= 5
+                log("Host #{sender} did not move into an applying state. Skipping.")
+                nil
+              else
+                # Here we check the "asked to run but not yet started" state.
+                if initiated[index][:initiated_at] > r[:data][:lastrun].to_i
+                  # increment the check counter. We give it 5 seconds to transition
+                  # into the applying state
+                  initiated[index][:checks] += 1
+                  # sender has been asked to run but hasn't started yet
+                  initiated[index]
+                end
+              end
+            end
+          end
+        end.reject { |val| !val }
       end
 
       def runonce_arguments
