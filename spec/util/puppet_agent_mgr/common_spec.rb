@@ -25,12 +25,27 @@ module MCollective::Util
       end
 
       describe "#create_common_puppet_cli" do
-        it "should test the host and port" do
-          expect { Common.create_common_puppet_cli(nil, nil, nil, "foo bar") }.to raise_error(/Invalid hostname/)
-          expect { Common.create_common_puppet_cli(nil, nil, nil, "foo:bar") }.to raise_error(/Invalid master port/)
 
-          Common.create_common_puppet_cli(nil, nil, nil, "foo:10").should == ["--server foo", "--masterport 10"]
-          Common.create_common_puppet_cli(nil, nil, nil, "foo").should == ["--server foo"]
+        it "should test the host and port" do
+          expect {
+            Common.create_common_puppet_cli(nil, nil, nil, "foo bar")
+          }.to raise_error(/The hostname/)
+          expect {
+            Common.create_common_puppet_cli(nil, nil, nil, "foo:bar")
+          }.to raise_error(/The port/)
+
+          servers_and_parameters = \
+            [["foo:10", ["--server foo", "--masterport 10"]],
+             ["foo", ["--server foo"]],
+             ["1.1.1.1", ["--server 1.1.1.1"]],
+             ["1.1.1.1:10", ["--server 1.1.1.1", "--masterport 10"]],
+             ["::1", ["--server ::1"]],
+             ["[::1]:10", ["--server ::1", "--masterport 10"]]]
+
+          servers_and_parameters.map do |server, parameters|
+            Common.create_common_puppet_cli(nil, nil, nil, server).should \
+              == parameters
+          end
         end
 
         it "should support noop" do

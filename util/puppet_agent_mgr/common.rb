@@ -114,14 +114,16 @@ module MCollective
           true
         end
 
-        def create_common_puppet_cli(noop=nil, tags=[], environment=nil, server=nil, splay=nil, splaylimit=nil, ignoreschedules=nil)
+        def create_common_puppet_cli(noop=nil, tags=[], environment=nil,
+                                     server=nil, splay=nil, splaylimit=nil,
+                                     ignoreschedules=nil)
           opts = []
           tags = [tags].flatten.compact
 
-          (host, port) = server.to_s.split(":")
+          Util::PuppetServerAddressValidation.validate_server(server)
+          hostname, port = \
+            Util::PuppetServerAddressValidation.parse_name_and_port_of(server)
 
-          raise("Invalid hostname '%s' specified" % host) if host && !(host =~ /\A(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])\Z/)
-          raise("Invalid master port '%s' specified" % port) if port && !(port =~ /\A\d+\Z/)
           raise("Invalid environment '%s' specified" % environment) if environment && !validate_name(environment)
           raise("Invalid splaylimit '%s' specified" % splaylimit) if splaylimit && !splaylimit.is_a?(Fixnum)
 
@@ -141,7 +143,7 @@ module MCollective
           opts << "--noop" if noop == true
           opts << "--no-noop" if noop == false
           opts << "--environment %s" % environment if environment
-          opts << "--server %s" % host if host
+          opts << "--server %s" % hostname if hostname
           opts << "--masterport %s" % port if port
           opts << "--ignoreschedules" if ignoreschedules
 
