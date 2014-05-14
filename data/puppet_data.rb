@@ -8,16 +8,14 @@ module MCollective
 
       query do |resource|
         configfile = Config.instance.pluginconf.fetch("puppet.config", nil)
+        mgr = Util::PuppetAgentMgr.manager(configfile)
+        current_status = mgr.status
 
-        puppet_agent = Util::PuppetAgentMgr.manager(configfile)
-        status = puppet_agent.status
-
-        [:applying, :enabled, :daemon_present, :lastrun, :since_lastrun, :status, :disable_message, :idling].each do |item|
-          result[item] = status[item]
+        [:applying, :enabled, :daemon_present, :lastrun,
+         :since_lastrun, :status, :disable_message, :idling].each do |item|
+          result[item] = current_status[item]
         end
       end
     end
   end
 end
-
-
