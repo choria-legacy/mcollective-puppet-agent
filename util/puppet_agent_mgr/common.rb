@@ -1,3 +1,5 @@
+require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'util',
+                         'puppet_server_address_validation'))
 module MCollective
   module Util
     module PuppetAgentMgr
