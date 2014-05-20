@@ -76,6 +76,11 @@ module Puppet
       @features ||= OpenStruct.new(:microsoft_windows? => false)
     end
   end
+
+  # duplicated from marionette_collective/lib/mcollective/util
+  def self.windows?
+    !!(RbConfig::CONFIG['host_os'] =~ /mswin|win32|dos|mingw|cygwin/i)
+  end
 end
 
 RSpec.configure do |config|

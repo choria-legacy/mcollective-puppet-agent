@@ -75,7 +75,7 @@ module MCollective
 
 
       def self.validate_server(server)
-        
+
         host = Host.new(server)
 
         if host.name && !(host.valid_ip_name? || host.valid_text_name?)

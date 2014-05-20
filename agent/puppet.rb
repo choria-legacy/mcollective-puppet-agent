@@ -24,7 +24,8 @@ module MCollective
           # was okay. The caller wants to know our exit code, so we'll just use
           # 0 or 1.
           begin
-            ::Process.create(:command_line => command, :creation_flags => ::Process::CREATE_NO_WINDOW)
+            ::Process.create(:command_line => command,
+                             :creation_flags => ::Process::CREATE_NO_WINDOW)
             0
           rescue ::Process::Error => e
             1
@@ -47,8 +48,11 @@ module MCollective
 
       action "disable" do
         begin
-          msg = @puppet_agent.disable!(request.fetch(:message, "Disabled via MCollective by %s at %s" % [request.caller, Time.now.strftime("%F %R")]))
-          reply[:status] = "Succesfully locked the Puppet agent: %s" % msg
+          request_msg = request.fetch(:message, "Disabled via MCollective by " \
+                                      "%s at %s" % [request.caller,
+                                                    Time.now.strftime("%F %R")])
+          agent_msg = @puppet_agent.disable!(request_msg)
+          reply[:status] = "Succesfully locked the Puppet agent: %s" % agent_msg
         rescue => e
           reply.fail(reply[:status] = "Could not disable Puppet: %s" % e.to_s)
         end
@@ -76,17 +80,17 @@ module MCollective
           reply[:logs] = {}
         end
 
-        reply[:type_distribution] = @puppet_agent.managed_resource_type_distribution
+        reply[:type_distribution]     = @puppet_agent.managed_resource_type_distribution
         reply[:out_of_sync_resources] = summary["resources"].fetch("out_of_sync", 0)
-        reply[:failed_resources] = summary["resources"].fetch("failed", 0)
-        reply[:changed_resources] = summary["resources"].fetch("changed", 0)
-        reply[:total_resources] = summary["resources"].fetch("total", 0)
-        reply[:total_time] = summary["time"].fetch("total", 0)
+        reply[:failed_resources]      = summary["resources"].fetch("failed", 0)
+        reply[:changed_resources]     = summary["resources"].fetch("changed", 0)
+        reply[:total_resources]       = summary["resources"].fetch("total", 0)
+        reply[:total_time]            = summary["time"].fetch("total", 0)
         reply[:config_retrieval_time] = summary["time"].fetch("config_retrieval", 0)
-        reply[:lastrun] = Integer(summary["time"].fetch("last_run", 0))
-        reply[:since_lastrun] = Integer(Time.now.to_i - reply[:lastrun])
-        reply[:config_version] = summary["version"].fetch("config", "unknown")
-        reply[:summary] = summary
+        reply[:lastrun]               = Integer(summary["time"].fetch("last_run", 0))
+        reply[:since_lastrun]         = Integer(Time.now.to_i - reply[:lastrun])
+        reply[:config_version]        = summary["version"].fetch("config", "unknown")
+        reply[:summary]               = summary
       end
 
       action "status" do
@@ -96,17 +100,27 @@ module MCollective
       end
 
       action "resource" do
-        allow_managed_resources_management = !!@config.pluginconf.fetch("puppet.resource_allow_managed_resources", "false").match(/^1|true|yes/)
-        resource_types_whitelist = @config.pluginconf.fetch("puppet.resource_type_whitelist", nil)
-        resource_types_blacklist = @config.pluginconf.fetch("puppet.resource_type_blacklist", nil)
+        allow_managed_resources_management = \
+          !!@config.pluginconf.fetch("puppet.resource_allow_managed_resources",
+                                     "false").match(/^1|true|yes/)
+        resource_types_whitelist = \
+          @config.pluginconf.fetch("puppet.resource_type_whitelist", nil)
+        resource_types_blacklist = \
+          @config.pluginconf.fetch("puppet.resource_type_blacklist", nil)
 
-        reply.fail!("You cannot specify both puppet.resource_type_whitelist and puppet.resource_type_blacklist in the config file") if resource_types_whitelist && resource_types_blacklist
+        if resource_types_whitelist && resource_types_blacklist
+          reply.fail!("You cannot specify both puppet.resource_type_whitelist " \
+                      "and puppet.resource_type_blacklist in the config file")
+        end
 
         # if 'none' is specified whitelist nothing
         resource_types_whitelist = "" if resource_types_whitelist == "none"
 
-        # if neither is specified default to whitelisting nothing thus denying everything
-        resource_types_whitelist = "" if resource_types_blacklist.nil? && resource_types_whitelist.nil?
+        # if neither is specified default to whitelisting
+        # nothing thus denying everything
+        if resource_types_blacklist.nil? && resource_types_whitelist.nil?
+          resource_types_whitelist = ""
+        end
 
         params = request.data.clone
         params.delete(:process_results)
@@ -123,7 +137,8 @@ module MCollective
           end
         end
 
-        if allow_managed_resources_management || !@puppet_agent.managing_resource?(resource_name)
+        if allow_managed_resources_management \
+           || !@puppet_agent.managing_resource?(resource_name)
           resource = ::Puppet::Type.type(type).new(params)
           report = ::Puppet::Transaction::Report.new(:mcollective)
           ::Puppet::Util::Log.newdestination(report)
@@ -139,9 +154,12 @@ module MCollective
 
           reply[:changed] = report.resource_statuses[resource_name].changed
 
-          reply.fail!("Failed to apply %s: %s" % [resource_name, reply[:result]]) if report.resource_statuses[resource_name].failed
+          if report.resource_statuses[resource_name].failed
+            reply.fail!("Failed to apply %s: %s" % [resource_name, reply[:result]])
+          end
         else
-          reply.fail!("Puppet is managing the resource '%s', refusing to create conflicting states" % resource_name)
+          reply.fail!("Puppet is managing the resource '%s', " \
+                      "refusing to create conflicting states" % resource_name)
         end
       end
 
@@ -198,21 +216,30 @@ module MCollective
           when :run_in_foreground
             Log.debug("Initiating a puppet agent run using the command: %s" % command)
 
-            exitcode = run(command, :stdout => :summary, :stderr => :summary, :chomp => true)
+            exitcode = run(command, {
+              :stdout => :summary,
+              :stderr => :summary,
+              :chomp => true,
+            })
 
             unless exitcode == 0
-              reply.fail!(reply[:summary] = "Puppet command '%s' had exit code %d, expected 0" % [command, exitcode])
+              reply.fail!(reply[:summary] = "Puppet command '%s' had exit " \
+                                            "code %d, expected 0" \
+                                            % [command, exitcode])
             else
-              reply[:summary] = "Started a Puppet run using the '%s' command" % command
+              reply[:summary] = "Started a Puppet run using the " \
+                                "'%s' command" % command
             end
 
           when :signal_running_daemon
-            Log.debug("Signaling the running Puppet agent to start an immediate run")
+            Log.debug("Signaling the running Puppet agent " \
+                      "to start an immediate run")
             @puppet_agent.signal_running_daemon
             reply[:summary] = "Signalled the running Puppet Daemon"
 
           else
-            reply.fail!(reply[:summary] = "Do not know how to do puppet runs using method %s" % run_method)
+            reply.fail!(reply[:summary] = "Do not know how to do puppet runs " \
+                                          "using method %s" % run_method)
         end
         reply[:initiated_at] = Time.now.to_i
       end
