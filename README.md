@@ -352,6 +352,8 @@ We support a few restrictions:
 
   * You can whitelist or blacklist which types can be executed, you want to avoid
     exec types for example
+  * You can whitelist or blacklist which resource name can be executed, you want to avoid
+    ssh package name for example
   * You can allow or deny the ability to change resources that Puppet is also managing
     as you'd want to avoid creating conflicting state
 
@@ -366,6 +368,14 @@ You can allow all types except the exec, service and package types using the
 following config line:
 
     plugin.puppet.resource_type_blacklist = exec,service,package
+
+You can say which resource names are allowed or denied. You define whitelist or blacklist 
+for resource type by adding resource type after plugin.puppet.resource_name_whitelist or
+plugin.puppet.resource_name_blacklist, for example:
+
+	plugin.puppet.resource_name_blacklist.package = ssh
+
+If you not defined list for resource type, all names are allowed. 
 
 You cannot mix and match white and black lists.
 

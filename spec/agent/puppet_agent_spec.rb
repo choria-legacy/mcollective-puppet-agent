@@ -65,7 +65,9 @@ describe "puppet agent" do
       @resource_status.stubs(:failed).returns(false)
       @resource_status.stubs(:changed).returns(true)
       @agent.config.stubs(:pluginconf).returns(
-        {"puppet.resource_type_whitelist" => "notify,host"})
+        {"puppet.resource_type_whitelist" => "notify,host",
+				 "puppet.resource_name_whitelist.notify" => "ssh,hello world",
+         "puppet.resource_name_blacklist.host" => "hadoop"})
     end
 
     it "should not allow both a white and a blacklist" do
@@ -80,6 +82,18 @@ describe "puppet agent" do
         "in the config file"
     end
 
+    it "should not allow both a resource name white and a blacklist for resource type" do
+      @agent.config.stubs(:pluginconf).returns(
+        {"puppet.resource_name_whitelist.notify" => "ssh,hello world",
+         "puppet.resource_name_blacklist.notify" => "x"})
+
+      result = @agent.call(:resource, :type => "notify", :name => "hello world")
+      result.should be_aborted_error
+      result[:statusmsg].should == "You cannot specify both " \
+        "puppet.resource_name_whitelist.notify and puppet.resource_name_blacklist.notify " \
+        "in the config file"
+    end
+
     it "should only allow types on the whitelist when set" do
       ["notify", "host"].each do |t|
         result = @agent.call(:resource, :type => t, :name => "hello world")
@@ -88,6 +102,17 @@ describe "puppet agent" do
       end
 
       result = @agent.call(:resource, :type => "exec", :name => "hello world")
+      result.should be_aborted_error
+    end
+
+    it "should only allow names on the whitelist when set" do
+      ["notify", "host"].each do |t|
+        result = @agent.call(:resource, :type => t, :name => "hello world")
+        result.should be_successful
+        result[:data][:result].should == "no output produced"
+      end
+
+      result = @agent.call(:resource, :type => "notify", :name => "ntp")
       result.should be_aborted_error
     end
 
@@ -101,6 +126,17 @@ describe "puppet agent" do
       end
 
       result = @agent.call(:resource, :type => "exec", :name => "hello world")
+      result.should be_successful
+      result[:data][:result].should == "no output produced"
+    end
+
+    it "should not allow names on the blacklist when set" do
+      ["host"].each do |t|
+        result = @agent.call(:resource, :type => t, :name => "hadoop")
+        result.should be_aborted_error
+      end
+
+      result = @agent.call(:resource, :type => "notify", :name => "hello world")
       result.should be_successful
       result[:data][:result].should == "no output produced"
     end
