@@ -105,8 +105,8 @@ module MCollective
           @config.pluginconf.fetch("puppet.resource_type_whitelist", nil)
         resource_types_blacklist = \
           @config.pluginconf.fetch("puppet.resource_type_blacklist", nil)
-
-        if resource_types_whitelist && resource_types_blacklist
+       
+       if resource_types_whitelist && resource_types_blacklist
           reply.fail!("You cannot specify both puppet.resource_type_whitelist " \
                       "and puppet.resource_type_blacklist in the config file")
         end
@@ -120,10 +120,21 @@ module MCollective
           resource_types_whitelist = ""
         end
 
+
         params = request.data.clone
         params.delete(:process_results)
         type = params.delete(:type).downcase
         resource_name = "%s[%s]" % [type.to_s.capitalize, params[:name]]
+
+        resource_names_whitelist = \
+          @config.pluginconf.fetch("puppet.resource_name_whitelist.%s" % type, nil)
+        resource_names_blacklist = \
+          @config.pluginconf.fetch("puppet.resource_name_blacklist.%s" % type, nil)
+
+        if resource_names_whitelist && resource_names_blacklist
+          reply.fail!("You cannot specify both puppet.resource_name_whitelist.%s " \
+                      "and puppet.resource_name_blacklist.%s in the config file" % [type, type])
+        end
 
         if resource_types_blacklist
           if resource_types_blacklist.split(",").include?(type)
@@ -132,6 +143,16 @@ module MCollective
         elsif resource_types_whitelist
           unless resource_types_whitelist.split(",").include?(type)
             reply.fail!("The %s type is not listed in the type whitelist" % type)
+          end
+        end
+
+        if resource_names_blacklist
+          if resource_names_blacklist.split(",").include?(params[:name])
+            reply.fail!("The %s name is listed in the name blacklist" % params[:name])
+          end
+        elsif resource_names_whitelist
+          unless resource_names_whitelist.split(",").include?(params[:name])
+            reply.fail!("The %s name is not listed in the name whitelist" % params[:name])
           end
         end
 
