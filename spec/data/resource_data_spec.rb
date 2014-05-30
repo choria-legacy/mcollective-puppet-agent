@@ -9,19 +9,19 @@ describe "puppet data" do
                                             "../../data/resource_data.rb"))
     @data = MCollective::Test::DataTest.new("resource_data",
                                             :data_file => @data_file).plugin
+    MCollective::Config.instance.expects(:pluginconf).returns(
+      {"puppet.config" => "rspec"})
+
+    @manager = mock
+    MCollective::Util::PuppetAgentMgr.expects(:manager).with("rspec").returns(@manager)
   end
 
   describe "#query_data" do
+
     it "should work" do
-      MCollective::Config.instance.expects(:pluginconf).returns(
-        {"puppet.config" => "rspec"})
-
-      manager = mock
-      MCollective::Util::PuppetAgentMgr.expects(:manager).with("rspec").returns(
-        manager)
-
-      manager.expects(:load_summary).returns(
-        {"version"   => {"puppet" => "3.0.0", "config" => 1350376829},
+      @manager.expects(:load_summary).returns(
+        {"version"   => {"puppet" => "3.0.0",
+                         "config" => 1350376829},
          "changes"   => {"total" => 1},
          "resources" => {"out_of_sync"       => 1,
                          "failed"            => 0,
@@ -38,7 +38,7 @@ describe "puppet data" do
                       "config_retrieval" => 0.148587},
          "events" => {"total" => 1, "failure" => 0, "success" => 1}})
 
-      manager.expects(:managing_resource?).with("File[rspec]").returns(true)
+      @manager.expects(:managing_resource?).with("File[rspec]").returns(true)
 
       time = Time.now; Time.expects(:now).returns(time)
       @data.lookup("File[rspec]").should have_data_items(
@@ -53,5 +53,45 @@ describe "puppet data" do
           :since_lastrun         => Integer(time - 1350376830),
           :config_version        => 1350376829})
     end
+
+    it "should work if the config version is a string" do
+      @manager.expects(:load_summary).returns(
+        {"version"   => {"config" => 'the version'},
+         "changes"   => {},
+         "resources" => {},
+         "time"      => {},
+         "events"    => {}})
+      @manager.expects(:managing_resource?).with("File[rspec]").returns(true)
+
+      @data.lookup("File[rspec]").should have_data_items(
+          {:config_version => "the version"})
+    end
+
+    it "should set config_version to unknown if not specified" do
+      @manager.expects(:load_summary).returns(
+        {"version"   => {},
+         "changes"   => {},
+         "resources" => {},
+         "time"      => {},
+         "events"    => {}})
+      @manager.expects(:managing_resource?).with("File[rspec]").returns(true)
+
+      @data.lookup("File[rspec]").should have_data_items(
+          {:config_version => "unknown"})
+    end
+
+    it "should set config_version to unknown if nil" do
+      @manager.expects(:load_summary).returns(
+        {"version"   => {"config" => nil},
+         "changes"   => {},
+         "resources" => {},
+         "time"      => {},
+         "events"    => {}})
+      @manager.expects(:managing_resource?).with("File[rspec]").returns(true)
+
+      @data.lookup("File[rspec]").should have_data_items(
+          {:config_version => "unknown"})
+    end
+
   end
 end

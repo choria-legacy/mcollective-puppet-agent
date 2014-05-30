@@ -6,6 +6,14 @@ module MCollective
         true
       end
 
+      def sanitize_val(result_value, default_value)
+        if result_value.nil?
+          return default_value
+        end
+        result_value
+      end
+
+
       query do |resource|
         configfile = Config.instance.pluginconf.fetch("puppet.config", nil)
 
@@ -14,15 +22,15 @@ module MCollective
 
         result[:managed] = puppet_agent.managing_resource?(resource) if resource
 
-        result[:out_of_sync_resources] = summary["resources"].fetch("out_of_sync", 0)
-        result[:failed_resources]      = summary["resources"].fetch("failed", 0)
-        result[:changed_resources]     = summary["resources"].fetch("changed", 0)
-        result[:total_resources]       = summary["resources"].fetch("total", 0)
-        result[:total_time]            = summary["time"].fetch("total", 0)
-        result[:config_retrieval_time] = summary["time"].fetch("config_retrieval", 0)
-        result[:lastrun]               = Integer(summary["time"].fetch("last_run", 0))
+        result[:out_of_sync_resources] = sanitize_val(summary["resources"].fetch("out_of_sync", 0), 0)
+        result[:failed_resources]      = sanitize_val(summary["resources"].fetch("failed", 0), 0)
+        result[:changed_resources]     = sanitize_val(summary["resources"].fetch("changed", 0), 0)
+        result[:total_resources]       = sanitize_val(summary["resources"].fetch("total", 0), 0)
+        result[:total_time]            = sanitize_val(summary["time"].fetch("total", 0), 0)
+        result[:config_retrieval_time] = sanitize_val(summary["time"].fetch("config_retrieval", 0), 0)
+        result[:lastrun]               = Integer(sanitize_val(summary["time"].fetch("last_run", 0), 0))
         result[:since_lastrun]         = Integer(Time.now.to_i - result[:lastrun])
-        result[:config_version]        = summary["version"].fetch("config", "unknown")
+        result[:config_version]        = sanitize_val(summary["version"].fetch("config", "unknown"), "unknown")
       end
     end
   end
