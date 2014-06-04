@@ -19,12 +19,6 @@ module MCollective::Util
       it "should not allow < 1 concurrency" do
         expect { Puppetrunner.new(mock, {}) }.to raise_error("Concurrency has to be > 0")
       end
-
-      it "should ensure compound filters are empty" do
-        client = mock
-        client.stubs(:filter).returns("compound" => [{}])
-        expect { Puppetrunner.new(client, {:concurrency => 1}) }.to raise_error("The compound filter should be empty")
-      end
     end
 
     describe "#runall" do
@@ -127,9 +121,37 @@ module MCollective::Util
 
     describe "#find_enabled_nodes" do
       it "should discover only enabled nodes" do
+        @runner.stubs(:log)
+        @runner.stubs(:sleep)
         @runner.client.expects(:compound_filter).with("puppet().enabled=true")
         @runner.client.expects(:discover).returns(["rspec"])
         @runner.find_enabled_nodes.should == ["rspec"]
+      end
+
+      it "should discover only enabled nodes with a compound filter" do
+        filter = MCollective::Util.empty_filter
+        filter["compound"] = [[{"statement"=>"foo"}, {"and"=>"and"}, {"not"=>"not"}, {"statement"=>"bar=baz"}]]
+        client = mock
+        client.stubs(:filter).returns(filter)
+        client.stubs(:progress=)
+        configuration = {:concurrency => 2}
+        @runner = Puppetrunner.new(client, configuration)
+        @runner.stubs(:log)
+        @runner.stubs(:sleep)
+        @runner.client.expects(:discover).returns(["rspec", "rspec2", "rspec3"])
+        @runner.find_enabled_nodes.should == ["rspec", "rspec2", "rspec3"]
+        @runner.client.filter["compound"].should == [
+                                                     [
+                                                      {"fstatement"=>{"name"=>"puppet", "operator"=>"==", "r_compare"=>"true", "params"=>nil, "value"=>"enabled"}},
+                                                      {"and"=>"and"},
+                                                      {"("=>"("},
+                                                      {"statement"=>"foo"},
+                                                      {"and"=>"and"},
+                                                      {"not"=>"not"},
+                                                      {"statement"=>"bar=baz"},
+                                                      {")"=>")"}
+                                                     ]
+                                                    ]
       end
     end
 

@@ -9,7 +9,6 @@ module MCollective
         @configuration = configuration
 
         raise("Concurrency has to be > 0") unless @concurrency > 0
-        raise("The compound filter should be empty") unless client.filter["compound"].empty?
 
         setup
       end
@@ -120,8 +119,26 @@ module MCollective
       end
 
       def find_enabled_nodes
-        @client.filter["compound"].clear
-        @client.compound_filter("puppet().enabled=true")
+        unless @client.filter["compound"].empty?
+          # munge the filter to and it with checking for enabled nodes
+          log("Modifying user-specified filter: and'ing with 'puppet().enabled=true'")
+          filter = @client.filter["compound"].clone
+          filter[0].unshift("("=>"(")
+          filter[0].unshift("and"=>"and")
+          filter[0].unshift({"fstatement" => {
+                           "operator"=>"==",
+                           "params"=>nil,
+                           "r_compare"=>"true",
+                           "name"=>"puppet",
+                           "value"=>"enabled"}}
+                       )
+          filter[0].push({")"=>")"})
+          @client.filter["compound"].clear
+          @client.filter["compound"] = filter
+        else
+          @client.filter["compound"].clear
+          @client.compound_filter("puppet().enabled=true")
+        end
         @client.discover.clone
       end
 
