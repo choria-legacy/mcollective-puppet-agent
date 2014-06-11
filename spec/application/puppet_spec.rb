@@ -181,18 +181,11 @@ module MCollective
       end
 
       describe "runall_command" do
-        it "should fail if a compound filter is set" do
-          @app.client.expects(:filter).returns({"compound" => [1]})
-          @app.expects(:raise_message).with(8).raises("rspec")
-          expect { @app.runall_command }.to raise_error("rspec")
-        end
-
         it "should use the Puppetrunner to schedule runs" do
           runner = mock
           runner.expects(:logger)
           runner.expects(:runall)
 
-          @app.client.expects(:filter).returns({"compound" => []})
           @app.runall_command(runner)
         end
       end

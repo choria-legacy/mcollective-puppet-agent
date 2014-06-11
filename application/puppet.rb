@@ -17,7 +17,9 @@ The ACTION can be one of the following:
     disable  - disable the Puppet Agent preventing catalog from being applied
     resource - manage individual resources using the Puppet Type (RAL) system
     runall   - invoke a puppet run on matching nodes, making sure to only run
-               CONCURRENCY nodes at a time
+               CONCURRENCY nodes at a time. NOTE that any compound filters (-S)
+               used with runall will be wrapped in parentheses and and'ed
+               with "puppet().enabled=true".
     runonce  - invoke a Puppet run on matching nodes
     status   - shows a short summary about each Puppet Agent status
     summary  - shows resource and run time summaries
@@ -133,7 +135,6 @@ END_OF_USAGE
                 5 => "The runall command needs a concurrency limit",
                 6 => "Do not know how to handle the '%s' command",
                 7 => "The concurrency for the runall command has to be greater than 0",
-                8 => "The runall command cannot be used with compound or -S filters on the CLI",
                 9 => "The resource command needs a type to operate on",
                 10 => "The resource command needs a name to operate on"}
 
@@ -259,8 +260,6 @@ END_OF_USAGE
   end
 
   def runall_command(runner=nil)
-    raise_message(8) unless client.filter["compound"].empty?
-
     unless runner
       require 'mcollective/util/puppetrunner.rb'
 
