@@ -2,6 +2,23 @@
 
 Change history for mcollective-puppet
 
+## 1.8.0
+
+Released 2014-08-20
+
+* Correctly honor concurrency argument of runall (MCOP-20)
+* Allow for validation of IPs as named (MCOP-13)
+* Change foreground run parameters to allow --splay to work again
+  (PR#17 hblock)
+* Refactored some internals to make tests less order-dependent
+  (MCOP-12)
+* Switched to using Process#spawn on Windows systems to correctly
+  respect PATH (MCOP-52)
+* Add the ability to whitelist and blacklist resources based on
+  resource name (PR#28 tczekajlo)
+* Default data plugin values to avoid exceptions around returning nil
+  (MCOP-47)
+* Make runall work with compound filters (MCOP-67)
 
 ## 1.7.2
 
@@ -41,7 +58,7 @@ Released 2013-10-15
 Released 2013-06-08
 
 * Support controlling Puppet on Windows (19541)
-* Increase the DDL timeout to better handle slower sercers where
+* Increase the DDL timeout to better handle slower servers where
   puppet start is slow (20618)
 
 ## 1.5.1
