@@ -92,6 +92,11 @@ module MCollective
         result = client.runonce(runonce_arguments.merge({:force => true}))
         client.reset
 
+        if result.empty?
+          log("%s did not return a result" % [host])
+          return 0
+        end
+
         begin
           if result[0][:statuscode] == 0
             log("%s schedule status: %s" % [host, result[0][:data][:summary]])

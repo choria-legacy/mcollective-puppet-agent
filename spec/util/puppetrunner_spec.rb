@@ -160,6 +160,13 @@ module MCollective::Util
         @runner.stubs(:log)
       end
 
+      it "should return 0 when do not get a response from the remote host" do
+        @runner.client.expects(:discover).with(:nodes => "rspec")
+        @runner.client.expects(:runonce).with(:force => true).returns([])
+        @runner.client.expects(:reset)
+        @runner.runhost("rspec").should == 0
+      end
+
       it "should return 0 when we encounter a older version of the agent on a remote host" do
         @runner.client.expects(:discover).with(:nodes => "rspec")
         @runner.client.expects(:runonce).with(:force => true).returns([{:data => {:summary => "rspec"}}])
