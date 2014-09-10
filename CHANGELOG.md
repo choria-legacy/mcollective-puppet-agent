@@ -2,6 +2,10 @@
 
 Change history for mcollective-puppet
 
+## 1.8.1
+
+* Handle slow/no response from agents when told to run (MCOP-290)
+
 ## 1.8.0
 
 Released 2014-08-20
