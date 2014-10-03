@@ -13,6 +13,7 @@ module MCollective
         @puppet_service = @config.pluginconf.fetch("puppet.windows_service", "puppet")
         @puppet_splaylimit = Integer(@config.pluginconf.fetch("puppet.splaylimit", 30))
         @puppet_splay = @config.pluginconf.fetch("puppet.splay", "true")
+        @puppet_signal_daemon = Util.str_to_bool(@config.pluginconf.fetch("puppet.signal_daemon", "true"))
 
         @puppet_agent = Util::PuppetAgentMgr.manager(configfile, @puppet_service)
       end
@@ -201,7 +202,7 @@ module MCollective
         args[:server] = request[:server] if request[:server]
         args[:tags] = request[:tags].split(",").map{|t| t.strip} if request[:tags]
         args[:ignoreschedules] = request[:ignoreschedules] if request[:ignoreschedules]
-        args[:signal_daemon] = false if MCollective::Util.windows?
+        args[:signal_daemon] = MCollective::Util.windows? ? false : @puppet_signal_daemon
 
         # we can only pass splay arguments if the daemon isn't running :(
         unless @puppet_agent.status[:daemon_present]
