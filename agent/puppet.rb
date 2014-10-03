@@ -13,7 +13,7 @@ module MCollective
         @puppet_service = @config.pluginconf.fetch("puppet.windows_service", "puppet")
         @puppet_splaylimit = Integer(@config.pluginconf.fetch("puppet.splaylimit", 30))
         @puppet_splay = @config.pluginconf.fetch("puppet.splay", "true")
-        @puppet_signal_daemon = Util.str_to_bool(@config.pluginconf.fetch("puppet.signal_daemon", "true"))
+        @puppet_signal_daemon = Util.str_to_bool(@config.pluginconf.fetch("puppet.signal_daemon", "false"))
 
         @puppet_agent = Util::PuppetAgentMgr.manager(configfile, @puppet_service)
       end
