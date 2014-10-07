@@ -414,6 +414,7 @@ describe "puppet agent" do
     before do
       @manager.stubs(:status).returns({})
       @manager.stubs(:signal_running_daemon)
+      @manager.stubs(:run_in_foreground)
       @manager.stubs(:disabled?).returns(false)
     end
 
@@ -431,7 +432,8 @@ describe "puppet agent" do
       @manager.expects(:runonce!).with({
         :options_only => true,
         :splay => false,
-      }).returns([:signal_running_daemon, []])
+        :signal_daemon => false,
+      }).returns([:run_in_foreground, []])
       result = @agent.call(:runonce, :force => true)
       result.should be_successful
     end
@@ -441,7 +443,8 @@ describe "puppet agent" do
         {:options_only => true,
          :ignoreschedules => true,
          :splay => true,
-         :splaylimit => 30}).returns([:signal_running_daemon, []])
+         :signal_daemon => false,
+         :splaylimit => 30}).returns([:run_in_foreground, []])
       result = @agent.call(:runonce, :ignoreschedules => true)
       result.should be_successful
     end
@@ -450,8 +453,9 @@ describe "puppet agent" do
       @manager.expects(:runonce!).with(
         {:options_only => true,
          :splay => true,
+         :signal_daemon => false,
          :noop => false,
-         :splaylimit => 30}).returns([:signal_running_daemon, []])
+         :splaylimit => 30}).returns([:run_in_foreground, []])
       result = @agent.call(:runonce, :noop => false)
       result.should be_successful
     end
@@ -460,8 +464,9 @@ describe "puppet agent" do
       @manager.expects(:runonce!).with(
         {:options_only => true,
          :splay => true,
+         :signal_daemon => false,
          :noop => true,
-         :splaylimit => 30}).returns([:signal_running_daemon, []])
+         :splaylimit => 30}).returns([:run_in_foreground, []])
       result = @agent.call(:runonce, :noop => true)
       result.should be_successful
     end
@@ -470,8 +475,9 @@ describe "puppet agent" do
       @manager.expects(:runonce!).with(
         {:options_only => true,
           :splay => true,
+          :signal_daemon => false,
           :environment => "rspec",
-          :splaylimit => 30}).returns([:signal_running_daemon, []])
+          :splaylimit => 30}).returns([:run_in_foreground, []])
       result = @agent.call(:runonce, :environment => "rspec")
       result.should be_successful
     end
@@ -480,8 +486,9 @@ describe "puppet agent" do
       @manager.expects(:runonce!).with(
         {:options_only => true,
          :splay => true,
+         :signal_daemon => false,
          :server => "rspec:123",
-         :splaylimit => 30}).returns([:signal_running_daemon, []])
+         :splaylimit => 30}).returns([:run_in_foreground, []])
       result = @agent.call(:runonce, :server => "rspec:123")
       result.should be_successful
     end
@@ -491,7 +498,8 @@ describe "puppet agent" do
         {:options_only => true,
          :tags => ["one", "two"],
          :splay => true,
-         :splaylimit => 30}).returns([:signal_running_daemon, []])
+         :signal_daemon => false,
+         :splaylimit => 30}).returns([:run_in_foreground, []])
       result = @agent.call(:runonce, :tags => "one,two")
       result.should be_successful
     end
@@ -506,7 +514,8 @@ describe "puppet agent" do
       @manager.expects(:runonce!).with(
         {:options_only=>true,
          :splay => true,
-         :splaylimit => 30}).returns([:signal_running_daemon, []])
+         :signal_daemon => false,
+         :splaylimit => 30}).returns([:run_in_foreground, []])
       result = agent.call(:runonce, :splay => true)
       result.should be_successful
     end
@@ -514,7 +523,8 @@ describe "puppet agent" do
     it "should support setting no-splay" do
       @manager.expects(:runonce!).with(
         {:options_only => true,
-         :splay => false}).returns([:signal_running_daemon, []])
+         :splay => false,
+         :signal_daemon => false}).returns([:run_in_foreground, []])
       result = @agent.call(:runonce, :splay => false)
       result.should be_successful
     end
@@ -523,7 +533,8 @@ describe "puppet agent" do
       @manager.expects(:runonce!).with(
         {:options_only => true,
          :splay => true,
-         :splaylimit => 60}).returns([:signal_running_daemon, []])
+         :signal_daemon => false,
+         :splaylimit => 60}).returns([:run_in_foreground, []])
       result = @agent.call(:runonce, :splaylimit => 60)
       result.should be_successful
     end
@@ -532,6 +543,7 @@ describe "puppet agent" do
       @manager.expects(:runonce!).with(
         {:options_only => true,
          :splay => true,
+         :signal_daemon => false,
          :splaylimit => 30}).returns([:run_in_foreground, ["--rspec"]])
       @agent.expects(:run).with("puppet agent --rspec",
                                 :stdout => :summary,
@@ -546,6 +558,7 @@ describe "puppet agent" do
       @manager.expects(:runonce!).with(
         {:options_only => true,
          :splay => true,
+         :signal_daemon => false,
          :splaylimit => 30}).returns([:run_in_foreground, ["--rspec"]])
       @agent.expects(:run).with("puppet agent --rspec",
                                 :stdout => :summary,
@@ -562,6 +575,7 @@ describe "puppet agent" do
       @manager.expects(:runonce!).with(
         {:options_only => true,
          :splay => true,
+         :signal_daemon => false,
          :splaylimit => 30}).returns([:rspec, []])
 
       result = @agent.call(:runonce)
