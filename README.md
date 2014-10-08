@@ -40,8 +40,8 @@ By default it just works but there are a few settings you can tweak in *server.c
 
 These are the defaults, adjust to taste.
 
-The agent allow managing of any resource via the Puppet RAL, by default it refuses to
-manage a resource also managed by Puppet which could create conflicting state.  If you
+The agent allows managing of any resource via the Puppet RAL. By default it refuses to
+manage a resource also managed by Puppet which could create conflicting state. If you
 do wish to allow any resources to be managed set this to true:
 
     plugin.puppet.resource_allow_managed_resources = true
@@ -63,6 +63,16 @@ Puppet Enterprise (puppet vs. pe-puppet); the default is puppet, but it can be
 explicitly specified:
 
     plugin.puppet.windows_service = puppet
+
+The agent will by default invoke `plugin.puppet.command` to initiate a run,
+passing through any applicable flags to adjust behavior. On POSIX-compliant
+platforms where Puppet is already running in daemonized mode, an alternative
+methodology is to send the daemonized service a USR1 signal, which will trigger
+the daemonized process to perform an immediate check-in. This is rarely
+desirable behavior as it constrains customizations to the run (such as noop or
+environment), but can be enabled in *server.cfg*.
+
+    plugin.puppet.signal_daemon = 0
 
 ## Usage
 ### Running Puppet
