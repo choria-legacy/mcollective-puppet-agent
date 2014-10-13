@@ -70,7 +70,8 @@ platforms where Puppet is already running in daemonized mode, an alternative
 methodology is to send the daemonized service a USR1 signal, which will trigger
 the daemonized process to perform an immediate check-in. This is rarely
 desirable behavior as it constrains customizations to the run (such as noop or
-environment), but can be enabled in *server.cfg*.
+environment), but can be enabled in *server.cfg*. signal_daemon behavior is
+disabled by default.
 
     plugin.puppet.signal_daemon = 0
 
