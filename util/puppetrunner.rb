@@ -148,43 +148,67 @@ module MCollective
       end
 
       # Get a list of nodes that are possibly applying
-      def find_applying_nodes(hosts, initiated = [])
+      def find_applying_nodes(hosts, statuses = [])
         @client.filter["identity"].clear
         hosts.each do |host|
           @client.identity_filter(host)
         end
 
-        initiated_host_names = initiated.map{ |h| h[:name] }
+        results = @client.status
 
-        result = @client.status.map do |r|
-          sender = r[:sender]
-          # check the value of applying as defined in the agent ddl
-          # NOTE: Only using this method can cause a race condition since it
-          # ignores the "asked to run but not yet started" state.
-          if r[:data][:applying] == true
-            if r[:data][:initiated_at]
-              {:name => sender,:initiated_at => r[:data][:initiated_at], :checks => 0}
+        hosts.each do |host|
+          result = results.select { |r| r[:sender] == host }.first
+          status = statuses.select { |s| s[:name] == host }.first
+
+          unless status
+            status = {
+              :name => host,
+              :initiated_at => 0,
+              :checks => 0,
+              :no_response => 0,
+            }
+            statuses << status
+          end
+
+          if result
+            # check the value of applying as defined in the agent ddl
+            if result[:data][:applying] == true
+              # we're applying
+              if result[:data][:initiated_at]
+                # it's a new agent, we can record when it started
+                status[:initiated_at] = result[:data][:initiated_at]
+              end
             else
-              {:name => sender, :initiated_at => 0, :checks => 0}
-            end
-          else
-            if index = initiated_host_names.index(sender)
-              if initiated[index][:checks] >= 5
-                log("Host #{sender} did not move into an applying state. Skipping.")
-                nil
+              # Here we check the "asked to run but not yet started" state.
+              if result[:data][:lastrun].to_i >= status[:initiated_at]
+                # The node has finished applying, remove from the running set
+                statuses.reject! { |s| s[:name] == host }
+                next
               else
-                # Here we check the "asked to run but not yet started" state.
-                if initiated[index][:initiated_at] > r[:data][:lastrun].to_i
-                  # increment the check counter. We give it 5 seconds to transition
-                  # into the applying state
-                  initiated[index][:checks] += 1
-                  # sender has been asked to run but hasn't started yet
-                  initiated[index]
-                end
+                # We haven't started yet that we can see, increment the check counter
+                status[:checks] += 1
               end
             end
+          else
+            # We didn't get a result from this host, log and record a check happened
+            log("Host #{host} did not respond to the status action.")
+            status[:no_response] += 1
           end
-        end.reject { |val| !val }
+
+          if status[:no_response] > 5
+            # If we missed many responses to status, assume it's a dead node
+            log("Host #{host} failed to respond multiple times. Skipping.")
+            statuses.reject! { |s| s[:name] == host }
+          end
+
+          if status[:checks] > 5
+            # If we hit more than 5 checks, assume it couldn't start
+            log("Host #{host} did not move into an applying state. Skipping.")
+            statuses.reject! { |s| s[:name] == host }
+          end
+        end
+
+        return statuses
       end
 
       def runonce_arguments
