@@ -292,7 +292,8 @@ module MCollective
         splay           = options.fetch(:splay, nil)
         splaylimit      = options.fetch(:splaylimit, nil)
         noop            = options.fetch(:noop, nil)
-        signal_daemon   = options.fetch(:signal_daemon, true)
+        signal_daemon   = options.fetch(:signal_daemon,
+                                        Util.str_to_bool(Config.instance.pluginconf.fetch("puppet.signal_daemon", "true")))
         foreground_run  = options.fetch(:foreground_run, false)
         environment     = options.fetch(:environment, nil)
         server          = options.fetch(:server, nil)

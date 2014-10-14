@@ -16,6 +16,9 @@ require File.expand_path(File.join(File.dirname(__FILE__),
 
 module MCollective::Util
   describe PuppetAgentMgr do
+    before :each do
+      MCollective::Config.instance.stubs(:pluginconf).returns({})
+    end
 
     describe "parent manager" do
 
@@ -355,6 +358,21 @@ module MCollective::Util
           @manager.expects(:signal_running_daemon).never
 
           @manager.runonce!(:foreground_run => true)
+        end
+
+        it "should do a foreground run when configured with signal_daemon=false" do
+          MCollective::Config.instance.stubs(:pluginconf).returns({
+            'puppet.signal_daemon' => 'false',
+          })
+          @manager.stubs(:applying?).returns(false)
+          @manager.stubs(:disabled?).returns(false)
+          @manager.stubs(:daemon_present?).returns(false)
+
+          @manager.expects(:run_in_foreground)
+          @manager.expects(:run_in_background).never
+          @manager.expects(:signal_running_daemon).never
+
+          @manager.runonce!
         end
 
         it "should support returning foreground run arguments only" do
