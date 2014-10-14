@@ -37,6 +37,8 @@ By default it just works but there are a few settings you can tweak in *server.c
     plugin.puppet.splay = true
     plugin.puppet.splaylimit = 30
     plugin.puppet.config = /etc/puppet/puppet.conf
+    plugin.puppet.windows_service = puppet
+    plugin.puppet.signal_daemon = true
 
 These are the defaults, adjust to taste.
 
@@ -64,16 +66,16 @@ explicitly specified:
 
     plugin.puppet.windows_service = puppet
 
-The agent will by default invoke `plugin.puppet.command` to initiate a run,
-passing through any applicable flags to adjust behavior. On POSIX-compliant
-platforms where Puppet is already running in daemonized mode, an alternative
-methodology is to send the daemonized service a USR1 signal, which will trigger
-the daemonized process to perform an immediate check-in. This is rarely
-desirable behavior as it constrains customizations to the run (such as noop or
-environment), but can be enabled in *server.cfg*. signal_daemon behavior is
-disabled by default.
+The agent will by default invoke `plugin.puppet.command` to initiate a
+run, passing through any applicable flags to adjust behavior.  On
+POSIX-compliant platforms where Puppet is already running in
+daemonized mode we support sending the daemonized service a USR1
+signal to trigger the daemonized process to perform an immediate
+check-in.  This will inhibit customizations to the run (such as noop
+or environment), but it is the default.  It's reccomended that you
+disable this like so.
 
-    plugin.puppet.signal_daemon = 0
+    plugin.puppet.signal_daemon = false
 
 ## Usage
 ### Running Puppet
@@ -380,13 +382,13 @@ following config line:
 
     plugin.puppet.resource_type_blacklist = exec,service,package
 
-You can say which resource names are allowed or denied. You define whitelist or blacklist 
+You can say which resource names are allowed or denied. You define whitelist or blacklist
 for resource type by adding resource type after plugin.puppet.resource_name_whitelist or
 plugin.puppet.resource_name_blacklist, for example:
 
 	plugin.puppet.resource_name_blacklist.package = ssh
 
-If you not defined list for resource type, all names are allowed. 
+If you not defined list for resource type, all names are allowed.
 
 You cannot mix and match white and black lists.
 
