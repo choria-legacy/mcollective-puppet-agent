@@ -207,7 +207,8 @@ module MCollective::Util
         @runner.client.stubs(:identity_filter).with("host1.example.com")
         @runner.find_applying_nodes(["host1.example.com"]).should == [{ :name => "host1.example.com",
                                                                         :initiated_at => 1,
-                                                                        :checks => 0}]
+                                                                        :no_response => 0,
+                                                                        :checks => 0 }]
       end
 
       it "should return all the nodes that match the 'asked to run but not yet started' state" do
@@ -215,8 +216,14 @@ module MCollective::Util
         data[0][:data][:applying] = false
         @runner.client.stubs(:identity_filter).with("host1.example.com")
         @runner.find_applying_nodes(["host1.example.com"],
-                                    [{:name => "host1.example.com", :initiated_at => 2, :checks => 0}]).should ==
-                                    [{:name => "host1.example.com", :initiated_at => 2, :checks => 1}]
+                                    [{ :name => "host1.example.com",
+                                       :initiated_at => 2,
+                                       :no_response => 0,
+                                       :checks => 0 }]).should ==
+                                    [{ :name => "host1.example.com",
+                                       :initiated_at => 2,
+                                       :no_response => 0,
+                                       :checks => 1 }]
       end
 
       it "should return the empty set if nothing is applying" do
@@ -225,8 +232,14 @@ module MCollective::Util
         @runner.client.stubs(:identity_filter).with("host1.example.com")
         @runner.client.stubs(:identity_filter).with("host2.example.com")
         @runner.find_applying_nodes(["host1.example.com", "host2.example.com"],
-                                    [{:name => "host1.example.com", :initiated_at => 1, :checks => 0},
-                                     {:name => "host2.example.com", :initiated_at => 1, :checks => 0}]).should == []
+                                    [{ :name => "host1.example.com",
+                                       :initiated_at => 1,
+                                       :no_response => 0,
+                                       :checks => 0 },
+                                     { :name => "host2.example.com",
+                                       :initiated_at => 1,
+                                       :no_response => 0,
+                                       :checks => 0 }]).should == []
 
       end
 
@@ -234,20 +247,73 @@ module MCollective::Util
         data[1][:data][:initiated_at] = 3
         @runner.client.stubs(:status).returns([data[1]])
         @runner.client.stubs(:identity_filter).with("host2.example.com")
-        @runner.expects(:log).with("Host host2.example.com did not move into an applying state. Skipping.")
+        @runner.expects(:log).with("Host host2.example.com did not move into an applying state. Skipping.").once
         result = @runner.find_applying_nodes(["host2.example.com"],
-                                    [{:name => "host2.example.com", :initiated_at => 3, :checks => 0}])
-        result.should == [{:name => "host2.example.com", :initiated_at => 3, :checks => 1}]
+                                    [{ :name => "host2.example.com",
+                                       :initiated_at => 3,
+                                       :no_response => 0,
+                                       :checks => 0 }])
+        result.should == [{:name => "host2.example.com", :initiated_at => 3, :no_response => 0, :checks => 1}]
         result = @runner.find_applying_nodes(["host2.example.com"], result)
-        result.should == [{:name => "host2.example.com", :initiated_at => 3, :checks => 2}]
+        result.should == [{:name => "host2.example.com", :initiated_at => 3, :no_response => 0, :checks => 2}]
         result = @runner.find_applying_nodes(["host2.example.com"], result)
-        result.should == [{:name => "host2.example.com", :initiated_at => 3, :checks => 3}]
+        result.should == [{:name => "host2.example.com", :initiated_at => 3, :no_response => 0, :checks => 3}]
         result = @runner.find_applying_nodes(["host2.example.com"], result)
-        result.should == [{:name => "host2.example.com", :initiated_at => 3, :checks => 4}]
-        result = @runner.find_applying_nodes(["host2.example.com"], result)
-        result.should == [{:name => "host2.example.com", :initiated_at => 3, :checks => 5}]
+        result.should == [{:name => "host2.example.com", :initiated_at => 3, :no_response => 0, :checks => 4}]
         result = @runner.find_applying_nodes(["host2.example.com"], result)
         result.should == []
+      end
+
+      it 'should log a node not responding' do
+        @runner.client.stubs(:status).returns([])
+        @runner.client.stubs(:identity_filter).with('host1.example.com')
+        @runner.expects(:log).with('Host host1.example.com did not respond to the status action.').once
+        statuses = @runner.find_applying_nodes(['host1.example.com'])
+        statuses.should == [{:name => 'host1.example.com', :initiated_at => 0, :no_response => 1, :checks => 0}]
+      end
+
+
+      it 'should cope with a node not responding' do
+        responses = [{ :sender => 'host1.example.com',
+                       :data => {
+                         :applying => true,
+                         :lastrun => 1,
+                         :initiated_at => 1
+                       },
+                     },
+                    ]
+
+        @runner.client.stubs(:status).returns(responses, [], responses)
+        @runner.client.stubs(:identity_filter).with('host1.example.com')
+        @runner.expects(:log).with('Host host1.example.com did not respond to the status action.').once
+
+        statuses = @runner.find_applying_nodes(['host1.example.com'])
+        statuses.should == [{:name => 'host1.example.com', :initiated_at => 1, :no_response => 0, :checks => 0}]
+
+        statuses = @runner.find_applying_nodes(['host1.example.com'], statuses)
+        statuses.should == [{:name => "host1.example.com", :initiated_at => 1, :no_response => 1, :checks => 0}]
+
+        statuses = @runner.find_applying_nodes(['host1.example.com'], statuses)
+        statuses.should == [{:name => 'host1.example.com', :initiated_at => 1, :no_response => 1, :checks => 0}]
+      end
+
+
+      it 'should give up on a non-responsive node after 5 attempts' do
+        @runner.client.stubs(:status).returns([])
+        @runner.client.stubs(:identity_filter).with('host1.example.com')
+        @runner.expects(:log).with('Host host1.example.com did not respond to the status action.').times(5)
+        @runner.expects(:log).with('Host host1.example.com failed to respond multiple times. Skipping.').once
+
+        statuses = @runner.find_applying_nodes(['host1.example.com'])
+        statuses.should == [{:name => 'host1.example.com', :initiated_at => 0, :no_response => 1, :checks => 0}]
+        statuses = @runner.find_applying_nodes(['host1.example.com'], statuses)
+        statuses.should == [{:name => 'host1.example.com', :initiated_at => 0, :no_response => 2, :checks => 0}]
+        statuses = @runner.find_applying_nodes(['host1.example.com'], statuses)
+        statuses.should == [{:name => 'host1.example.com', :initiated_at => 0, :no_response => 3, :checks => 0}]
+        statuses = @runner.find_applying_nodes(['host1.example.com'], statuses)
+        statuses.should == [{:name => 'host1.example.com', :initiated_at => 0, :no_response => 4, :checks => 0}]
+        statuses = @runner.find_applying_nodes(['host1.example.com'], statuses)
+        statuses.should == []
       end
     end
 
