@@ -195,13 +195,13 @@ module MCollective
             status[:no_response] += 1
           end
 
-          if status[:no_response] > 5
+          if status[:no_response] >= 5
             # If we missed many responses to status, assume it's a dead node
             log("Host #{host} failed to respond multiple times. Skipping.")
             statuses.reject! { |s| s[:name] == host }
           end
 
-          if status[:checks] > 5
+          if status[:checks] >= 5
             # If we hit more than 5 checks, assume it couldn't start
             log("Host #{host} did not move into an applying state. Skipping.")
             statuses.reject! { |s| s[:name] == host }
