@@ -2,7 +2,14 @@
 
 Change history for mcollective-puppet
 
+## 1.9.0
+
+* Track nodes that did not respond to the puppet.status action during runall (MCOP-309)
+* Expose `plugin.puppet.signal_daemon` configuration option (PR#37, MCOP-310)
+
 ## 1.8.1
+
+Released 2014-09-11
 
 * Handle slow/no response from agents when told to run (MCOP-290)
 
