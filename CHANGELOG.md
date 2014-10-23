@@ -2,7 +2,14 @@
 
 Change history for mcollective-puppet
 
+
+## 1.9.1
+
+* Extract `make_status` to fix some code flows in `mco runall` (MCOP-330)
+
 ## 1.9.0
+
+Released 2014-10-21
 
 * Track nodes that did not respond to the puppet.status action during runall (MCOP-309)
 * Expose `plugin.puppet.signal_daemon` configuration option (PR#37, MCOP-310)
