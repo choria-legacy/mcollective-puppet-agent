@@ -331,5 +331,27 @@ module MCollective::Util
         @runner.runonce_arguments.should == {:splaylimit=>60, :force=>true, :environment=>"rspec", :noop=>true, :server=>"rspec:123", :tags=>"one,two", :splay=>true, :ignoreschedules=>true}
       end
     end
+
+    describe '#make_status' do
+      it 'should default initiated_at' do
+        status = @runner.send(:make_status, 'test-host')
+        status.should == {
+          :name => 'test-host',
+          :initiated_at => 0,
+          :checks => 0,
+          :no_response => 0,
+        }
+      end
+
+      it 'should allow initiated_at to be specified' do
+        status = @runner.send(:make_status, 'test-host', 2551)
+        status.should == {
+          :name => 'test-host',
+          :initiated_at => 2551,
+          :checks => 0,
+          :no_response => 0,
+        }
+      end
+    end
   end
 end
