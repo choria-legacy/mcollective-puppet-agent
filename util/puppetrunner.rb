@@ -74,7 +74,7 @@ module MCollective
               host_list.push(host)
             else
               # kick a host, put it in the running bucket
-              running << {:name => host, :initiated_at => runhost(host), :checks => 0}
+              running << make_status(host, runhost(host))
             end
           else
             # we are at concurrency, wait a second to give some time for something
@@ -161,12 +161,7 @@ module MCollective
           status = statuses.select { |s| s[:name] == host }.first
 
           unless status
-            status = {
-              :name => host,
-              :initiated_at => 0,
-              :checks => 0,
-              :no_response => 0,
-            }
+            status = make_status(host)
             statuses << status
           end
 
@@ -221,6 +216,20 @@ module MCollective
         arguments[:tags] = Array(@configuration[:tag]).join(",") if @configuration.include?(:tag)
 
         arguments
+      end
+
+      private
+
+      # create the status objects managed by find_applying_nodes and runhosts
+      def make_status(host, initiated_at = 0)
+        status = {
+          :name => host,
+          :initiated_at => initiated_at,
+          :checks => 0,
+          :no_response => 0,
+        }
+
+        return status
       end
     end
   end
