@@ -61,29 +61,33 @@ module MCollective
       def runhosts(hosts)
         # copy the host list so we can manipulate it
         host_list = hosts.clone
-        # determine the state of the network based on the supplied host list
+
+        # determine the initial state of the network based on the supplied host list
         running = find_applying_nodes(host_list)
+
         while !host_list.empty?
           # Check if we have room in the running bucket
           if running.size < @concurrency
-            # if we have room add another host to the bucket
+            # we have room for another running host
             host = host_list.pop
             # check if host is already in a running state
             if !running.select{ |running_host| running_host[:name] == host }.empty?
-              # put it back in the host list if it is, save it for later
+              # already in a running state, push it back onto the end of the queue
               host_list.push(host)
             else
-              # kick a host, put it in the running bucket
-              running << make_status(host, runhost(host))
+              # kick the host, put it in the running bucket
+              initiated_at = runhost(host)
+              running << make_status(host, initiated_at)
+              next
             end
-          else
-            # we are at concurrency, wait a second to give some time for something
-            # to happen
-            sleep 1
-            # determine the state of the network based on the supplied host list
-            running = find_applying_nodes(hosts, running)
           end
+
+          # wait a second to give some time for something to happen
+          sleep 1
+          # update our view of the network
+          running = find_applying_nodes(hosts, running)
         end
+
         log("Iteration complete. Initiated a Puppet run on #{hosts.size} nodes.")
       end
 
