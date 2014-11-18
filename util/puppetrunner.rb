@@ -54,6 +54,7 @@ module MCollective
         hosts = find_enabled_nodes
 
         log("Found %d enabled %s" % [hosts.size, hosts.size == 1 ? "node" : "nodes"])
+        Log.debug("Enabled nodes are #{hosts.inspect}")
 
         runhosts(hosts)
       end
@@ -73,6 +74,7 @@ module MCollective
             # check if host is already in a running state
             if !running.select{ |running_host| running_host[:name] == host }.empty?
               # already in a running state, push it back onto the end of the queue
+              Log.debug("#{host} is already being tracked, requeuing")
               host_list.push(host)
             else
               # kick the host, put it in the running bucket
@@ -153,6 +155,7 @@ module MCollective
 
       # Get a list of nodes that are possibly applying
       def find_applying_nodes(hosts, statuses = [])
+        Log.debug("checking applying status of #{hosts.inspect}")
         @client.filter["identity"].clear
         hosts.each do |host|
           @client.identity_filter(host)
@@ -175,17 +178,22 @@ module MCollective
               # we're applying
               if result[:data][:initiated_at]
                 # it's a new agent, we can record when it started
+                Log.debug("#{host} run was started at #{result[:data][:initiated_at]}")
                 status[:initiated_at] = result[:data][:initiated_at]
+              else
+                Log.debug("#{host} run started")
               end
             else
               # Here we check the "asked to run but not yet started" state.
               if result[:data][:lastrun].to_i >= status[:initiated_at]
+                Log.debug("#{host} run completed")
                 # The node has finished applying, remove from the running set
                 statuses.reject! { |s| s[:name] == host }
                 next
               else
                 # We haven't started yet that we can see, increment the check counter
                 status[:checks] += 1
+                Log.debug("#{host} starting, checks #{status[:checks]}")
               end
             end
           else
