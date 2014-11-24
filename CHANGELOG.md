@@ -2,8 +2,14 @@
 
 Change history for mcollective-puppet
 
+## 1.9.2
+
+* Refactor `Puppetrunner#run_hosts` to remove a infinite loop (MCOP-351)
+* Add more log messages at debug (MCOP-352)
 
 ## 1.9.1
+
+Released 2014-10-23
 
 * Extract `make_status` to fix some code flows in `mco runall` (MCOP-330)
 
