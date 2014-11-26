@@ -2,7 +2,14 @@
 
 Change history for mcollective-puppet
 
+## 1.9.3
+
+* Fully qualify the call to MCollective::Log in
+  MCollective::Application::Puppet (MCOP-405)
+
 ## 1.9.2
+
+Released 2014-10-25
 
 * Refactor `Puppetrunner#run_hosts` to remove a infinite loop (MCOP-351)
 * Add more log messages at debug (MCOP-352)
