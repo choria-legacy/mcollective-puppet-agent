@@ -268,7 +268,7 @@ END_OF_USAGE
 
     runner.logger do |msg|
       puts "%s: %s" % [Time.now.strftime("%F %T"), msg]
-      Log.debug(msg)
+      ::MCollective::Log.debug(msg)
     end
 
     runner.runall(!!configuration[:rerun], configuration[:rerun])
