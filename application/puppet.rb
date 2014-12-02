@@ -183,6 +183,9 @@ END_OF_USAGE
 
     min = values.min
     max = values.max
+    total = values.inject(:+)
+    len = values.length
+    avg = total.to_f / len
 
     bucket_size = ((max - min) / Float(bucket_count)) + 1
 
@@ -193,7 +196,7 @@ END_OF_USAGE
       end
     end
 
-    "%s  min: %-6s max: %-6s" % [spark(buckets), shorten_number(min), shorten_number(max)]
+    "%s  min: %-6s avg: %-6s max: %-6s" % [spark(buckets), shorten_number(min), shorten_number(avg), shorten_number(max)]
   end
 
   def client
