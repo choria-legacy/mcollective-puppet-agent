@@ -7,8 +7,8 @@ rvm:
   - 1.9.3
 env:
   matrix:
-    - MCOLLECTIVE_GEM_VERSION ="~> 2.2.0"
-    - MCOLLECTIVE_GEM_VERSION ="~> 2.3.0"
-    - MCOLLECTIVE_GEM_VERSION ="~> 2.4.0"
+    - MCOLLECTIVE_GEM_VERSION="~> 2.5.0"
+    - MCOLLECTIVE_GEM_VERSION="~> 2.6.0"
+    - MCOLLECTIVE_GEM_VERSION="~> 2.7.0"
 notifications:
   email: false
