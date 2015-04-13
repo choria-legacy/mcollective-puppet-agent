@@ -2,7 +2,13 @@
 
 Change history for mcollective-puppet
 
+## 1.10.0
+
+* Added support for puppet 4.0.  (MCOP-496)
+
 ## 1.9.3
+
+Released 2014-12-02
 
 * Fully qualify the call to MCollective::Log in
   MCollective::Application::Puppet (MCOP-405)
