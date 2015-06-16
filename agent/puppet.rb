@@ -18,11 +18,13 @@ module MCollective
 
       def run(command, options)
         if MCollective::Util.windows?
+          require 'win32/process'
           # If creating the process doesn't outright fail, assume everything
           # was okay. The caller wants to know our exit code, so we'll just use
           # 0 or 1.
           begin
-            ::Process.spawn(command, :new_pgroup => true)
+            ::Process.create(:command_line => command,
+                             :creation_flags => ::Process::CREATE_NEW_CONSOLE)
             0
           rescue ::Process::Error => e
             1
