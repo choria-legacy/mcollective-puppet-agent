@@ -26,7 +26,8 @@ module MCollective
             ::Process.create(:command_line => command,
                              :creation_flags => ::Process::CREATE_NEW_CONSOLE)
             0
-          rescue ::Process::Error => e
+          rescue Exception => e
+            Log.warn("Failed to execute #{command} - #{e}")
             1
           end
         else
@@ -107,7 +108,7 @@ module MCollective
         resource_types_blacklist = \
           @config.pluginconf.fetch("puppet.resource_type_blacklist", nil)
 
-       if resource_types_whitelist && resource_types_blacklist
+        if resource_types_whitelist && resource_types_blacklist
           reply.fail!("You cannot specify both puppet.resource_type_whitelist " \
                       "and puppet.resource_type_blacklist in the config file")
         end
