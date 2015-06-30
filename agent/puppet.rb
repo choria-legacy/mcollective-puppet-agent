@@ -205,8 +205,9 @@ module MCollective
         args[:ignoreschedules] = request[:ignoreschedules] if request[:ignoreschedules]
         args[:signal_daemon] = false if MCollective::Util.windows?
 
-        # we can only pass splay arguments if the daemon isn't running :(
-        unless @puppet_agent.status[:daemon_present]
+        # we can only pass splay arguments if the daemon isn't in signal mode :(
+        signal_daemon = Util.str_to_bool(@config.pluginconf.fetch("puppet.signal_daemon","true")) 
+        unless @puppet_agent.status[:daemon_present] && signal_daemon
           if request[:force] == true
             # forcing implies --no-splay
             args[:splay] = false
