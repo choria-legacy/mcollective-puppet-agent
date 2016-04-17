@@ -70,6 +70,16 @@ END_OF_USAGE
          :description => "Maximum splay time for this run if splay is set",
          :type        => Integer
 
+  option :use_cached_catalog,
+         :arguments   => ["--use_cached_catalog"],
+         :description => "Use cached catalog for this run",
+         :type        => :bool
+
+  option :no_use_cached_catalog,
+         :arguments   => ["--no-use_cached_catalog"],
+         :description => "Do not use cached catalog for this run",
+         :type        => :bool
+
   option :ignoreschedules,
          :arguments   => ["--ignoreschedules"],
          :description => "Disable schedule processing",
@@ -125,6 +135,7 @@ END_OF_USAGE
 
     configuration[:noop] = false if configuration.include?(:no_noop)
     configuration[:splay] = false if configuration.include?(:no_splay)
+    configuration[:use_cached_catalog] = false if configuration.include?(:no_use_cached_catalog)
   end
 
   def raise_message(message, *args)
@@ -232,7 +243,7 @@ END_OF_USAGE
   def runonce_arguments
     arguments = {}
 
-    [:force, :server, :noop, :environment, :splay, :splaylimit, :ignoreschedules].each do |arg|
+    [:use_cached_catalog, :force, :server, :noop, :environment, :splay, :splaylimit, :ignoreschedules].each do |arg|
       arguments[arg] = configuration[arg] if configuration.include?(arg)
     end
 
