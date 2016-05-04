@@ -258,6 +258,12 @@ action "runonce", :description => "Invoke a single Puppet run" do
           :optional    => true,
           :maxlength   => 50
 
+    input :use_cached_catalog,
+          :prompt      => "Use Cached Catalog",
+          :description => "Determine if to use the cached catalog or not",
+          :type        => :boolean,
+          :optional    => true
+
     output :summary,
            :description => "Summary of command run",
            :display_as  => "Summary",

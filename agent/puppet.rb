@@ -204,6 +204,7 @@ module MCollective
         args[:tags] = request[:tags].split(",").map{|t| t.strip} if request[:tags]
         args[:ignoreschedules] = request[:ignoreschedules] if request[:ignoreschedules]
         args[:signal_daemon] = false if MCollective::Util.windows?
+        args[:use_cached_catalog] = request[:use_cached_catalog] if request.include?(:use_cached_catalog)
 
         # we can only pass splay arguments if the daemon isn't in signal mode :(
         signal_daemon = Util.str_to_bool(@config.pluginconf.fetch("puppet.signal_daemon","true")) 
