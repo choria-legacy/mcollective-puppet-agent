@@ -476,7 +476,7 @@ describe "puppet agent" do
       result.should be_successful
     end
 
-    it "should support use_Cached_catalog" do
+    it "should support use_cached_catalog" do
       @manager.expects(:runonce!).with(
         {:options_only => true,
          :splay => true,
