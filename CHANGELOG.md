@@ -2,9 +2,19 @@
 
 Change history for mcollective-puppet
 
+## 1.11.0
+
+* Add support for puppet's use_cached_catalog option (MCOP-539)
+* Pin rake to 10.4 to enable running test on ruby 1.8.7 (PR#63)
+* Enable splay/force options in daemon mode, without signal_daemon set (PR#59)
+* Update for newer versions of the win32-process gem (MCOP-525)
+* Run puppet on windows with a console - fixes the powershell exec provider (MCOP-521)
+
 ## 1.10.0
 
-* Added support for puppet 4.0.  (MCOP-496)
+Released 2015-04-14
+
+* Added support for puppet 4.0. (MCOP-496)
 
 ## 1.9.3
 
