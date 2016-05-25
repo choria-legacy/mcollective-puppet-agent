@@ -18,13 +18,16 @@ module MCollective
 
       def run(command, options)
         if MCollective::Util.windows?
+          require 'win32/process'
           # If creating the process doesn't outright fail, assume everything
           # was okay. The caller wants to know our exit code, so we'll just use
           # 0 or 1.
           begin
-            ::Process.spawn(command, :new_pgroup => true)
+            ::Process.create(:command_line => command,
+                             :creation_flags => ::Process::CREATE_NEW_CONSOLE)
             0
-          rescue ::Process::Error => e
+          rescue Exception => e
+            Log.warn("Failed to execute #{command} - #{e}")
             1
           end
         else
@@ -105,7 +108,7 @@ module MCollective
         resource_types_blacklist = \
           @config.pluginconf.fetch("puppet.resource_type_blacklist", nil)
 
-       if resource_types_whitelist && resource_types_blacklist
+        if resource_types_whitelist && resource_types_blacklist
           reply.fail!("You cannot specify both puppet.resource_type_whitelist " \
                       "and puppet.resource_type_blacklist in the config file")
         end
@@ -201,9 +204,11 @@ module MCollective
         args[:tags] = request[:tags].split(",").map{|t| t.strip} if request[:tags]
         args[:ignoreschedules] = request[:ignoreschedules] if request[:ignoreschedules]
         args[:signal_daemon] = false if MCollective::Util.windows?
+        args[:use_cached_catalog] = request[:use_cached_catalog] if request.include?(:use_cached_catalog)
 
-        # we can only pass splay arguments if the daemon isn't running :(
-        unless @puppet_agent.status[:daemon_present]
+        # we can only pass splay arguments if the daemon isn't in signal mode :(
+        signal_daemon = Util.str_to_bool(@config.pluginconf.fetch("puppet.signal_daemon","true")) 
+        unless @puppet_agent.status[:daemon_present] && signal_daemon
           if request[:force] == true
             # forcing implies --no-splay
             args[:splay] = false

@@ -51,7 +51,7 @@ module MCollective
               when "2"
                 raise "Window is not supported yet" if MCollective::Util.windows?
                 return MgrV2.new(configfile, service_name, testing)
-              when "3"
+              when "3", "4"
                 if MCollective::Util.windows?
                   return MgrWindows.new(configfile, service_name, testing)
                 else
@@ -203,7 +203,7 @@ module MCollective
       # validates arguments and returns the CL options to execute puppet
       def create_common_puppet_cli(noop=nil, tags=[], environment=nil,
                                    server=nil, splay=nil, splaylimit=nil,
-                                   ignoreschedules=nil)
+                                   ignoreschedules=nil, use_cached_catalog=nil)
         opts = []
         tags = [tags].flatten.compact
 
@@ -237,6 +237,8 @@ module MCollective
         opts << "--server %s" % hostname if hostname
         opts << "--masterport %s" % port if port
         opts << "--ignoreschedules" if ignoreschedules
+        opts << "--use_cached_catalog" if use_cached_catalog == true
+        opts << "--no-use_cached_catalog" if use_cached_catalog == false
         opts
       end
 
@@ -273,7 +275,7 @@ module MCollective
       def runonce!(options={})
         valid_options = [:noop, :signal_daemon, :foreground_run, :tags,
                          :environment, :server, :splay, :splaylimit,
-                         :options_only, :ignoreschedules]
+                         :options_only, :ignoreschedules, :use_cached_catalog]
 
         options.keys.each do |opt|
           unless valid_options.include?(opt)
@@ -298,11 +300,12 @@ module MCollective
         environment     = options.fetch(:environment, nil)
         server          = options.fetch(:server, nil)
         ignoreschedules = options.fetch(:ignoreschedules, nil)
+        use_cached_catalog = options.fetch(:use_cached_catalog, nil)
         tags            = [ options[:tags] ].flatten.compact
 
         clioptions = create_common_puppet_cli(noop, tags, environment,
                                               server, splay, splaylimit,
-                                              ignoreschedules)
+                                              ignoreschedules, use_cached_catalog)
 
         if idling? && signal_daemon && !clioptions.empty?
           raise "Cannot specify any custom puppet options " \

@@ -2,7 +2,7 @@ metadata :name => "puppet",
          :description => "Run Puppet agent, get its status, and enable/disable it",
          :author => "R.I.Pienaar <rip@devco.net>",
          :license => "ASL2.0",
-         :version => "1.9.3",
+         :version => "1.11.0",
          :url => "http://puppetlabs.com",
          :timeout => 20
 
@@ -257,6 +257,12 @@ action "runonce", :description => "Invoke a single Puppet run" do
           :validation  => :puppet_variable,
           :optional    => true,
           :maxlength   => 50
+
+    input :use_cached_catalog,
+          :prompt      => "Use Cached Catalog",
+          :description => "Determine if to use the cached catalog or not",
+          :type        => :boolean,
+          :optional    => true
 
     output :summary,
            :description => "Summary of command run",

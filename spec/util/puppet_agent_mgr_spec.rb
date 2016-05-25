@@ -36,6 +36,12 @@ module MCollective::Util
           PuppetAgentMgr.manager(nil, "puppet", nil, true)
         end
 
+        it "should use the 3 manager for puppet 4" do
+          Puppet.expects(:version).returns("4.0.0")
+          PuppetAgentMgr::MgrV3.expects(:new)
+          PuppetAgentMgr.manager(nil, "puppet", nil, true)
+        end
+
         it "should pass the supplied config file to the manager" do
           Puppet.expects(:version).returns("3.0.0")
           PuppetAgentMgr::MgrV3.expects(:new).with(

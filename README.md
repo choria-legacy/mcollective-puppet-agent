@@ -321,6 +321,8 @@ And you can then allow the manager user to disable and enable nodes using the
 Together this allows you to ensure that you both have a maintenance window and a
 period where Puppet will not start services again without your knowledge
 
+Note: The runall action is implemented in terms of the runonce action.  When setting up Actionpolicy rules, be sure to include a runonce action permission.
+
 ### Managing individual resources using the RAL
 
 Puppet is built on resource types and providers for those types, an instance of

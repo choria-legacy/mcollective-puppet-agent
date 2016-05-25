@@ -466,6 +466,26 @@ describe "puppet agent" do
       result.should be_successful
     end
 
+    it "should support no-use_cached_catalog" do
+      @manager.expects(:runonce!).with(
+        {:options_only => true,
+         :splay => true,
+         :use_cached_catalog => false,
+         :splaylimit => 30}).returns([:signal_running_daemon, []])
+      result = @agent.call(:runonce, :use_cached_catalog => false)
+      result.should be_successful
+    end
+
+    it "should support use_cached_catalog" do
+      @manager.expects(:runonce!).with(
+        {:options_only => true,
+         :splay => true,
+         :use_cached_catalog => true,
+         :splaylimit => 30}).returns([:signal_running_daemon, []])
+      result = @agent.call(:runonce, :use_cached_catalog => true)
+      result.should be_successful
+    end
+
     it "should support setting the environment" do
       @manager.expects(:runonce!).with(
         {:options_only => true,
