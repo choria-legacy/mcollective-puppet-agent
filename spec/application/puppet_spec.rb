@@ -137,7 +137,7 @@ module MCollective
           end
 
           @app.expects(:spark).with([2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0]).returns("rspec")
-          @app.sparkline_for_field(results, :rspec, 11).should == "rspec  min: 10.0   max: 21.0  "
+          @app.sparkline_for_field(results, :rspec, 11).should == "rspec  min: 10.0   avg: 15.5   max: 21.0  "
         end
 
         it 'should return an empty string with bad data to extract from' do
