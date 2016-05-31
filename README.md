@@ -10,7 +10,7 @@ usable under both Puppet 2.7 and 3.
   * Supports limiting runs to certain tags
   * Support splay, no splay, splaylimits
   * Supports specifying a custom environment
-  * Supports specifying a custom master host and port
+  * Supports specifying a custom master host and port (needs to be explicitly allowed)
   * Support Puppet 3 features like lock messages when disabling
   * Use the new summary plugins to provide convenient summaries where appropriate
   * Use the new validation plugins to provider richer input validation and better errors
@@ -73,9 +73,16 @@ daemonized mode we support sending the daemonized service a USR1
 signal to trigger the daemonized process to perform an immediate
 check-in.  This will inhibit customizations to the run (such as noop
 or environment), but it is the default.  It's reccomended that you
-disable this like so.
+disable this like so:
 
     plugin.puppet.signal_daemon = false
+
+The agent will not by default accept the server option. If passed then
+the agent returns an error. Passing the option can be allowed in the
+configuration file like so:
+
+     plugin.puppet.allow_server_override = true
+
 
 ## Usage
 ### Running Puppet
@@ -84,7 +91,7 @@ Most basic case is just a run:
 
     $ mco puppet runonce
 
-...against a specific server and port:
+...against a specific server and port (needs to be explicitly allowed):
 
     $ mco puppet runonce --server puppet.example.net:1234
 

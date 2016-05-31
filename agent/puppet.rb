@@ -200,7 +200,13 @@ module MCollective
         args[:options_only] = true
         args[:noop] = request[:noop] if request.include?(:noop)
         args[:environment] = request[:environment] if request[:environment]
-        args[:server] = request[:server] if request[:server]
+        if request[:server]
+          if Util.str_to_bool(@config.pluginconf.fetch("puppet.allow_server_override","false"))
+            args[:server] = request[:server]
+          else
+            reply.fail!(reply[:summary] = "Passing 'server' option is not allowed in module configuration")
+          end
+        end
         args[:tags] = request[:tags].split(",").map{|t| t.strip} if request[:tags]
         args[:ignoreschedules] = request[:ignoreschedules] if request[:ignoreschedules]
         args[:signal_daemon] = false if MCollective::Util.windows?
