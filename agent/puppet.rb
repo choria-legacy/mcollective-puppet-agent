@@ -12,7 +12,7 @@ module MCollective
         @puppet_command = @config.pluginconf.fetch("puppet.command", "puppet agent")
         @puppet_service = @config.pluginconf.fetch("puppet.windows_service", "puppet")
         @puppet_splaylimit = Integer(@config.pluginconf.fetch("puppet.splaylimit", 30))
-        @puppet_splay = @config.pluginconf.fetch("puppet.splay", "true")
+        @puppet_splay = Util.str_to_bool(@config.pluginconf.fetch("puppet.splay", "true"))
         @puppet_agent = Util::PuppetAgentMgr.manager(configfile, @puppet_service)
       end
 
@@ -100,9 +100,8 @@ module MCollective
       end
 
       action "resource" do
-        allow_managed_resources_management = \
-          !!@config.pluginconf.fetch("puppet.resource_allow_managed_resources",
-                                     "false").match(/^1|true|yes/)
+        allow_managed_resources_management = Util.str_to_bool(
+          @config.pluginconf.fetch("puppet.resource_allow_managed_resources", "false"))
         resource_types_whitelist = \
           @config.pluginconf.fetch("puppet.resource_type_whitelist", nil)
         resource_types_blacklist = \
@@ -224,7 +223,7 @@ module MCollective
             args[:splaylimit] = request[:splaylimit] if request.include?(:splaylimit)
 
             unless args.include?(:splay)
-              args[:splay] = !!(@puppet_splay =~ /^1|true|yes/)
+              args[:splay] = @puppet_splay
             end
 
             if !args.include?(:splaylimit) && args[:splay]
