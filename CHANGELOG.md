@@ -2,7 +2,13 @@
 
 Change history for mcollective-puppet
 
+## 1.11.1
+
+* Disallow server option by default CVE-2015-7331 (MCOP-557)
+
 ## 1.11.0
+
+Released 2016-05-26
 
 * Add support for puppet's use_cached_catalog option (MCOP-539)
 * Pin rake to 10.4 to enable running test on ruby 1.8.7 (PR#63)
