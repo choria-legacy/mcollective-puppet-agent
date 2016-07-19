@@ -397,3 +397,10 @@ You cannot mix and match white and black lists.
 So to repeat by default this feature is effectively turned off as there is an empty
 whitelist by default - no types are allowed to be managed.  You should think carefully
 before enabling this feature and combine it with the Authorization system when you do
+
+## Maintenance
+
+Maintainers: Alessandro Parisi <alessandro@puppet.com>, Michael Smith
+<michael.smith@puppet.com>, Michal Ruzicka <michal.ruzicka@puppet.com>.
+
+Tickets: File bug tickets at https://tickets.puppet.com/browse/MCOP.
