@@ -496,13 +496,25 @@ describe "puppet agent" do
       result.should be_successful
     end
 
-    it "should support setting the server to use" do
+    it "should not by default support setting the server to use" do
+      result = @agent.call(:runonce, :server => "rspec:123")
+      result.should be_aborted_error
+      result[:statusmsg].should == "Passing 'server' option is not allowed " \
+                                   "in module configuration"
+    end
+
+    it "should support setting the server to use if explicitly allowed in configuration" do
+      MCollective::PluginManager.clear
+      agent = MCollective::Test::LocalAgentTest.new(
+                "puppet",
+                :agent_file => @agent_file,
+                :config => {"plugin.puppet.allow_server_override" => true}).plugin
       @manager.expects(:runonce!).with(
         {:options_only => true,
          :splay => true,
          :server => "rspec:123",
          :splaylimit => 30}).returns([:signal_running_daemon, []])
-      result = @agent.call(:runonce, :server => "rspec:123")
+      result = agent.call(:runonce, :server => "rspec:123")
       result.should be_successful
     end
 
