@@ -34,6 +34,24 @@ describe "puppet agent" do
     end
   end
 
+  describe "#default_agent_command" do
+    before do
+      @agent_file = File.join(File.dirname(__FILE__), "../../agent/puppet.rb")
+      @agent = MCollective::Test::LocalAgentTest.new("puppet",
+                                             :agent_file => @agent_file).plugin
+    end
+
+    it "should support unix AIO" do
+      File.expects(:exist?).with("/opt/puppetlabs/bin/puppet").returns(true)
+      expect(@agent.default_agent_command).to eq("/opt/puppetlabs/bin/puppet agent")
+    end
+
+    it "should retain old default behaviour" do
+      File.stubs(:exist?).returns(false)
+      expect(@agent.default_agent_command).to eq("puppet agent")
+    end
+  end
+
   describe "#resource" do
     before :each do
       # instantiate a new manager for each spec
@@ -408,7 +426,10 @@ describe "puppet agent" do
 
       @agent_file = File.join(File.dirname(__FILE__), "../../agent/puppet.rb")
       @agent = MCollective::Test::LocalAgentTest.new("puppet",
-                                             :agent_file => @agent_file).plugin
+                                             :agent_file => @agent_file,
+                                             :config => {
+                                               "plugin.puppet.command" => "puppet agent"
+                                             }).plugin
     end
 
     before do

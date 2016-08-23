@@ -9,11 +9,24 @@ module MCollective
       def startup_hook
         configfile = @config.pluginconf.fetch("puppet.config", nil)
 
-        @puppet_command = @config.pluginconf.fetch("puppet.command", "puppet agent")
+        @puppet_command = @config.pluginconf.fetch("puppet.command", default_agent_command)
         @puppet_service = @config.pluginconf.fetch("puppet.windows_service", "puppet")
         @puppet_splaylimit = Integer(@config.pluginconf.fetch("puppet.splaylimit", 30))
         @puppet_splay = Util.str_to_bool(@config.pluginconf.fetch("puppet.splay", "true"))
         @puppet_agent = Util::PuppetAgentMgr.manager(configfile, @puppet_service)
+      end
+
+      # Determines the default command to run for puppet agent
+      #
+      # On windows the installer sets up the Path so this should
+      # work with default relying on the path, AIO on Unix does not
+      # so check those and default to that
+      def default_agent_command
+        if File.exist?("/opt/puppetlabs/bin/puppet")
+          "/opt/puppetlabs/bin/puppet agent"
+        else
+          "puppet agent"
+        end
       end
 
       def run(command, options)
@@ -212,7 +225,7 @@ module MCollective
         args[:use_cached_catalog] = request[:use_cached_catalog] if request.include?(:use_cached_catalog)
 
         # we can only pass splay arguments if the daemon isn't in signal mode :(
-        signal_daemon = Util.str_to_bool(@config.pluginconf.fetch("puppet.signal_daemon","true")) 
+        signal_daemon = Util.str_to_bool(@config.pluginconf.fetch("puppet.signal_daemon","true"))
         unless @puppet_agent.status[:daemon_present] && signal_daemon
           if request[:force] == true
             # forcing implies --no-splay
