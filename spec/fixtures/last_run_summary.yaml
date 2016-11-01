@@ -8,6 +8,7 @@
     out_of_sync: 0
     failed: 0
     failed_to_restart: 0
+    corrective_change: 2
   version:
     puppet: 2.7.17
     config: 1347903296

@@ -190,6 +190,8 @@ END_OF_USAGE
       end
     end
 
+    values.compact!
+
     return '' if values.empty?
 
     min = values.min
@@ -298,6 +300,7 @@ END_OF_USAGE
     puts "            Out Of Sync resources: %s" % sparkline_for_field(results, :out_of_sync_resources)
     puts "                 Failed resources: %s" % sparkline_for_field(results, :failed_resources)
     puts "                Changed resources: %s" % sparkline_for_field(results, :changed_resources)
+    puts "              Corrected resources: %s" % sparkline_for_field(results, :corrected_resources)
     puts "  Config Retrieval time (seconds): %s" % sparkline_for_field(results, :config_retrieval_time)
     puts "         Total run-time (seconds): %s" % sparkline_for_field(results, :total_time)
     puts "    Time since last run (seconds): %s" % sparkline_for_field(results, :since_lastrun)

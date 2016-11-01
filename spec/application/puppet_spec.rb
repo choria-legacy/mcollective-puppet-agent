@@ -140,7 +140,7 @@ module MCollective
           @app.sparkline_for_field(results, :rspec, 11).should == "rspec  min: 10.0   avg: 15.5   max: 21.0  "
         end
 
-        it 'should return an empty string with bad data to extract from' do
+        it "should return an empty string with bad data to extract from" do
           results = []
           (10...22).each do |c|
             results << {:statuscode => 1, :data => {:rspec => c}}
@@ -149,9 +149,21 @@ module MCollective
           @app.sparkline_for_field(results, :rspec).should == ''
         end
 
-        it 'should return an empty string with no data to extract' do
+        it "should return an empty string with no data to extract" do
           results = []
           @app.sparkline_for_field(results, :rspec).should == ''
+        end
+
+        it "should correctly handle mixed agent versions where some fields might be missing from some results" do
+          results = []
+
+          (10...22).each do |c|
+            results << {:statuscode => 0, :data => {:rspec => c}}
+          end
+          results << {:statuscode => 0, :data => {}}
+
+          @app.expects(:spark).with([2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0]).returns("rspec")
+          @app.sparkline_for_field(results, :rspec, 11).should == "rspec  min: 10.0   avg: 15.5   max: 21.0  "
         end
       end
 
@@ -198,7 +210,7 @@ module MCollective
           @app.expects(:halt)
 
           [:total_resources, :out_of_sync_resources, :failed_resources, :changed_resources,
-           :config_retrieval_time, :total_time, :since_lastrun]. each do |field|
+           :config_retrieval_time, :total_time, :since_lastrun, :corrected_resources]. each do |field|
               @app.expects(:sparkline_for_field).with([], field)
            end
 

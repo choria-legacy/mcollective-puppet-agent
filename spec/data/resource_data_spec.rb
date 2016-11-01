@@ -17,7 +17,6 @@ describe "puppet data" do
   end
 
   describe "#query_data" do
-
     it "should work" do
       @manager.expects(:load_summary).returns(
         {"version"   => {"puppet" => "3.0.0",
@@ -27,6 +26,7 @@ describe "puppet data" do
                          "failed"            => 0,
                          "total"             => 8,
                          "changed"           => 1,
+                         "corrective_change" => 2,
                          "restarted"         => 0,
                          "skipped"           => 6,
                          "failed_to_restart" => 0,
@@ -45,6 +45,7 @@ describe "puppet data" do
          {:managed               => true,
           :out_of_sync_resources => 1,
           :failed_resources      => 0,
+          :corrected_resources   => 2,
           :changed_resources     => 1,
           :total_resources       => 8,
           :total_time            => 0.149789,

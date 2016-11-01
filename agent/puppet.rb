@@ -96,6 +96,7 @@ module MCollective
         reply[:type_distribution]     = @puppet_agent.managed_resource_type_distribution
         reply[:out_of_sync_resources] = summary["resources"].fetch("out_of_sync", 0)
         reply[:failed_resources]      = summary["resources"].fetch("failed", 0)
+        reply[:corrected_resources]   = summary["resources"].fetch("corrective_change", 0)
         reply[:changed_resources]     = summary["resources"].fetch("changed", 0)
         reply[:total_resources]       = summary["resources"].fetch("total", 0)
         reply[:total_time]            = summary["time"].fetch("total", 0)

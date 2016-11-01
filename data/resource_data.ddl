@@ -48,6 +48,11 @@ dataquery :description => "Puppet Managed Resources" do
            :display_as  => "Failed Resources",
            :default     => -1
 
+    output :corrected_resources,
+           :description => "Resources that were correctively changed",
+           :display_as  => "Corrected Resources",
+           :default     => -1
+
     output :changed_resources,
            :description => "Resources that were changed",
            :display_as  => "Changed Resources",

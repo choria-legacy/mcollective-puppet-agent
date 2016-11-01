@@ -168,15 +168,16 @@ We can show a graph view of various metrics of the last Puppet run using the
 
     $ mco puppet summary
 
-    Summary statistics for 28 nodes:
+    Summary statistics for 15 nodes:
 
-                      Total resources: ▂▇▂▁▁▃▁▂▂▂▄▁▂▁▁▁▁▁▂▁  min: 332.0  max: 695.0
-                Out Of Sync resources: ▇▂▁▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁  min: 0.0    max: 6.0
-                     Failed resources: ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁  min: 0.0    max: 0.0
-                    Changed resources: ▇▂▁▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁  min: 0.0    max: 6.0
-      Config Retrieval time (seconds): ▆▇▂▄▁▂▁▄▁▂▃▃▁▁▂▁▁▁▁▁  min: 3.0    max: 53.4
-             Total run-time (seconds): ▇▄▂▁▄▄▂▃▁▁▁▂▂▁▁▄▂▁▁▁  min: 6.9    max: 91.6
-        Time since last run (seconds): ▂▁▁▁▁▁▁▁▁▁▁▁▁▅▇▁▁▁▁▂  min: 40.1k  max: 42.3k
+                      Total resources: ▇▁▁▁▁▁▁▁▁▂▁▂▁▁▂▂▁▁▁▂  min: 112.0  avg: 288.9  max: 735.0
+                Out Of Sync resources: ▇▂▁▄▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁  min: 0.0    avg: 2.5    max: 7.0
+                     Failed resources: ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁  min: 0.0    avg: 0.0    max: 0.0
+                    Changed resources: ▇▂▁▄▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁  min: 0.0    avg: 2.5    max: 7.0
+                  Corrected resources: ▇▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁  min: 0.0    avg: 0.7    max: 2.0
+      Config Retrieval time (seconds): ▇▂▁▁▃▁▃▂▁▁▁▁▁▁▁▁▁▁▁▁  min: 2.4    avg: 6.6    max: 15.0
+             Total run-time (seconds): ▇▃▂▁▃▂▁▁▂▁▁▁▂▁▁▂▁▁▁▁  min: 6.1    avg: 22.9   max: 73.4
+        Time since last run (seconds): ▇▁▂▁▁▂▁▁▁▂▁▁▁▁▁▂▂▂▂▃  min: 86.0   avg: 758.9  max: 1.7k
 
 Here each bar indicates the number of nodes that fall within the region, for
 example we can see there are a group of nodes on the right that took longer

@@ -90,6 +90,7 @@ module MCollective
         summary["resources"] = \
           {"failed" => 0,
            "changed" => 0,
+           "corrective_change" => 0,
            "total" => 0,
            "restarted" => 0,
            "out_of_sync" => 0}.merge!(summary["resources"])
