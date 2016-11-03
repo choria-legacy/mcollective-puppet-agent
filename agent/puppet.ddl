@@ -83,9 +83,9 @@ end
 action "last_run_summary", :description => "Get the summary of the last Puppet run" do
     display :always
 
-    input  :parse_log,
+    input  :logs,
            :description => "Whether or not to parse the logs from last_run_report.yaml",
-           :prompt      => "Parse log from last_run_report.yaml?",
+           :prompt      => "Parse log from last_run_report.yaml",
            :optional    => true,
            :type        => :boolean,
            :default     => false

@@ -366,7 +366,7 @@ describe "puppet agent" do
       result[:data][:type_distribution].should == {"File" => 1, "Exec" => 2}
     end
 
-    context 'parse_log' do
+    context 'logs' do
       before :each do
         @manager.stubs(:load_summary).returns({})
       end
@@ -381,7 +381,7 @@ describe "puppet agent" do
       context 'true' do
         it 'should call on last_run_logs' do
           @manager.expects(:last_run_logs).once
-          @agent.call(:last_run_summary, :parse_log => true)
+          @agent.call(:last_run_summary, :logs => true)
         end
       end
     end

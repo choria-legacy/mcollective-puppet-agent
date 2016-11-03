@@ -124,18 +124,23 @@ module MCollective
         type_distribution
       end
 
-      # loads the report file and returns log messages grouped by log levels
+      # Reads the last run report and extracts the log lines
+      #
+      # @return [Array<Hash>]
       def last_run_logs
-        logs = {}
-        if File.exists?(Puppet[:lastrunreport])
-          report = YAML.load_file(Puppet[:lastrunreport])
-          levels = Puppet::Util::Log.levels
-          levels.each do |level|
-            logs[level.to_s] = report.logs.select {
-              |r| r.level == level }.map { |r| r.message.chomp }
-          end
+        return [] unless File.exists?(Puppet[:lastrunreport])
+
+        report = YAML.load_file(Puppet[:lastrunreport])
+
+        report.logs.map do |line|
+          {
+            "time_utc" => line.time.utc.to_i,
+            "time" => line.time.to_i,
+            "level" => line.level.to_s,
+            "source" => line.source,
+            "msg" => line.message.chomp
+          }
         end
-        logs
       end
 
       # covert seconds to human readable string
