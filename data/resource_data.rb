@@ -24,6 +24,7 @@ module MCollective
 
         result[:out_of_sync_resources] = sanitize_val(summary["resources"].fetch("out_of_sync", 0), 0)
         result[:failed_resources]      = sanitize_val(summary["resources"].fetch("failed", 0), 0)
+        result[:corrected_resources]   = sanitize_val(summary["resources"].fetch("corrective_change", 0), 0)
         result[:changed_resources]     = sanitize_val(summary["resources"].fetch("changed", 0), 0)
         result[:total_resources]       = sanitize_val(summary["resources"].fetch("total", 0), 0)
         result[:total_time]            = sanitize_val(summary["time"].fetch("total", 0), 0)
