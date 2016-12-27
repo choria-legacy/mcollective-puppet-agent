@@ -347,7 +347,6 @@ module MCollective
       # is the agent currently applying a catalog
       def applying?
         begin
-          return false if disabled?
           platform_applying?
         rescue NotImplementedError
           raise

@@ -29,13 +29,7 @@ module MCollective::Util
     end
 
     describe "#applying?" do
-      it "should return false when disabled" do
-        @manager.expects(:disabled?).returns(true)
-        @manager.applying?.should == false
-      end
-
       it "should return false when the lock file is absent" do
-        @manager.expects(:disabled?).returns(false)
         File.expects(:exist?).with("puppetdlockfile").returns(false)
         MCollective::Log.expects(:warn).never
         File::Stat.expects(:new).never
@@ -47,7 +41,6 @@ module MCollective::Util
         File::Stat.expects(:new).returns(stat)
         File.expects(:exist?).with("puppetdlockfile").returns(true)
         File.expects(:read).with("puppetdlockfile").returns("1")
-        @manager.expects(:disabled?).returns(false)
         @manager.expects(:has_process_for_pid?).with("1").returns(true)
         @manager.applying?.should == true
       end
@@ -55,7 +48,6 @@ module MCollective::Util
       it "should return false if the lockfile is empty" do
         stat = OpenStruct.new(:size => 0)
         File::Stat.expects(:new).returns(stat)
-        @manager.expects(:disabled?).returns(false)
         File.expects(:exist?).with("puppetdlockfile").returns(true)
         @manager.applying?.should == false
       end
@@ -65,13 +57,12 @@ module MCollective::Util
         File::Stat.expects(:new).returns(stat)
         File.expects(:exist?).with("puppetdlockfile").returns(true)
         File.expects(:read).with("puppetdlockfile").returns("1")
-        @manager.expects(:disabled?).returns(false)
         @manager.expects(:has_process_for_pid?).with("1").returns(false)
         @manager.applying?.should == false
       end
 
       it "should return false on any error" do
-        @manager.expects(:disabled?).raises("fail")
+        @manager.expects(:platform_applying?).raises("fail")
         MCollective::Log.expects(:warn)
         @manager.applying?.should == false
       end
