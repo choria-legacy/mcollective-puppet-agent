@@ -288,7 +288,7 @@ module MCollective::Util
         it "should return a default structure when no file is found" do
           Puppet.expects(:[]).with(:lastrunreport).returns("lastrunreport")
 
-          @manager.last_run_logs.should == {}
+          expect(@manager.last_run_logs).to eq([])
         end
 
         it "should return log results if the file is found" do
@@ -297,15 +297,16 @@ module MCollective::Util
                                                 "last_run_report.yaml"))
           Puppet.expects(:[]).with(:lastrunreport).returns(yamlfile).times(2..3)
 
-          @manager.last_run_logs.should \
-            == {"info"    => ["Info level message"],
-                "err"     => ["Err level message"],
-                "debug"   => ["Debug level message"],
-                "warning" => ["Warning level message"],
-                "crit"    => ["Crit level message"],
-                "alert"   => ["Alert level message"],
-                "emerg"   => ["Emerg level message"],
-                "notice"  => ["Notice level message"]}
+          expect(@manager.last_run_logs).to eq([
+            {"time_utc"=>1378216841, "time"=>1378216841, "level"=>"notice", "source"=>"Puppet", "msg"=>"Notice level message"},
+            {"time_utc"=>1378216841, "time"=>1378216841, "level"=>"err", "source"=>"Puppet", "msg"=>"Err level message"},
+            {"time_utc"=>1378216841, "time"=>1378216841, "level"=>"warning", "source"=>"Puppet", "msg"=>"Warning level message"},
+            {"time_utc"=>1378216841, "time"=>1378216841, "level"=>"debug", "source"=>"Puppet", "msg"=>"Debug level message"},
+            {"time_utc"=>1378216841, "time"=>1378216841, "level"=>"crit", "source"=>"Puppet", "msg"=>"Crit level message"},
+            {"time_utc"=>1378216841, "time"=>1378216841, "level"=>"alert", "source"=>"Puppet", "msg"=>"Alert level message"},
+            {"time_utc"=>1378216841, "time"=>1378216841, "level"=>"info", "source"=>"Puppet", "msg"=>"Info level message"},
+            {"time_utc"=>1378216841, "time"=>1378216841, "level"=>"emerg", "source"=>"Puppet", "msg"=>"Emerg level message"}
+          ])
         end
       end
 
@@ -828,7 +829,7 @@ module MCollective::Util
         it "should return a default structure when no file is found" do
           Puppet.expects(:[]).with(:lastrunreport).returns("lastrunreport")
 
-          @manager.last_run_logs.should == {}
+          expect(@manager.last_run_logs).to eq([])
         end
 
         it "should return log results if the file is found" do
@@ -837,15 +838,16 @@ module MCollective::Util
                                                 "last_run_report.yaml"))
           Puppet.expects(:[]).with(:lastrunreport).returns(yamlfile).times(2..3)
 
-          @manager.last_run_logs.should \
-            == {"info" => ["Info level message"],
-                "err" => ["Err level message"],
-                "debug" => ["Debug level message"],
-                "warning" => ["Warning level message"],
-                "crit" => ["Crit level message"],
-                "alert" => ["Alert level message"],
-                "emerg" => ["Emerg level message"],
-                "notice" => ["Notice level message"]}
+          expect(@manager.last_run_logs).to eq([
+            {"time_utc"=>1378216841, "time"=>1378216841, "level"=>"notice", "source"=>"Puppet", "msg"=>"Notice level message"},
+            {"time_utc"=>1378216841, "time"=>1378216841, "level"=>"err", "source"=>"Puppet", "msg"=>"Err level message"},
+            {"time_utc"=>1378216841, "time"=>1378216841, "level"=>"warning", "source"=>"Puppet", "msg"=>"Warning level message"},
+            {"time_utc"=>1378216841, "time"=>1378216841, "level"=>"debug", "source"=>"Puppet", "msg"=>"Debug level message"},
+            {"time_utc"=>1378216841, "time"=>1378216841, "level"=>"crit", "source"=>"Puppet", "msg"=>"Crit level message"},
+            {"time_utc"=>1378216841, "time"=>1378216841, "level"=>"alert", "source"=>"Puppet", "msg"=>"Alert level message"},
+            {"time_utc"=>1378216841, "time"=>1378216841, "level"=>"info", "source"=>"Puppet", "msg"=>"Info level message"},
+            {"time_utc"=>1378216841, "time"=>1378216841, "level"=>"emerg", "source"=>"Puppet", "msg"=>"Emerg level message"}
+          ])
         end
       end
 

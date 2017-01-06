@@ -32,7 +32,7 @@ module Puppet
   end
   class Util;end
   class Util::Log
-    attr_reader :level, :message
+    attr_reader :level, :message, :time, :source
     @loglevel = 2
     @levels = [:debug,:info,:notice,:warning,:err,:alert,:emerg,:crit]
     def self.level

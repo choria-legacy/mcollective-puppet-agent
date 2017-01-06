@@ -87,7 +87,7 @@ module MCollective
       action "last_run_summary" do
         summary = @puppet_agent.load_summary
 
-        if request[:parse_log]
+        if request[:logs]
           reply[:logs] = @puppet_agent.last_run_logs
         else
           reply[:logs] = {}
