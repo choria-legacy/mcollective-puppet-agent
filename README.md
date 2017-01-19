@@ -3,8 +3,8 @@
 This agent manages the *puppet agent*, unlike the older *puppetd* plugin
 this one supports Puppet 3 and recent changes made to its locking and status files.
 
-In addition to basic support for Puppet 3 this adds a number of new features, most them
-usable under both Puppet 2.7 and 3.
+In addition to basic support for Puppet 3 and 4 this adds a number of new features, most
+them usable under Puppet 2.7 and later.
 
   * Supports noop runs or no-noop runs
   * Supports limiting runs to certain tags
@@ -19,7 +19,7 @@ usable under both Puppet 2.7 and 3.
 To use this agent you need:
 
   * MCollective 2.2.0 at least
-  * Puppet 2.7 or 3.0
+  * Puppet 2.7 or later
 
 # TODO
 
@@ -36,7 +36,7 @@ By default it just works but there are a few settings you can tweak in *server.c
     plugin.puppet.command = puppet agent
     plugin.puppet.splay = true
     plugin.puppet.splaylimit = 30
-    plugin.puppet.config = /etc/puppet/puppet.conf
+    # plugin.puppet.config leaves it to Puppet's default location
     plugin.puppet.windows_service = puppet
     plugin.puppet.signal_daemon = true
 
