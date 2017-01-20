@@ -2,7 +2,19 @@
 
 Change history for mcollective-puppet
 
+## 1.12.0
+
+Released 2017-01-19
+
+* Add display of average values to the puppet summary report (MCOP-538)
+* Consider puppet-agent AIO paths when determining agent command (MCOP-576)
+* Report corrective change from puppet run summary when available (MCOP-578)
+* Do not assume a disabled agent is idle (MCOP-581)
+* Improve last_run_summary logs output, rename parse_log to logs (MCOP-580)
+
 ## 1.11.1
+
+Released 2016-06-27
 
 * Disallow server option by default CVE-2015-7331 (MCOP-557)
 
