@@ -24,6 +24,8 @@ module MCollective
       def default_agent_command
         if File.exist?("/opt/puppetlabs/bin/puppet")
           "/opt/puppetlabs/bin/puppet agent"
+        elsif File.exist?("C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat")
+          "C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat agent"
         else
           "puppet agent"
         end

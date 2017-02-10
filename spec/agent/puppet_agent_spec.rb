@@ -46,6 +46,12 @@ describe "puppet agent" do
       expect(@agent.default_agent_command).to eq("/opt/puppetlabs/bin/puppet agent")
     end
 
+    it "should support windows AIO" do
+      File.expects(:exist?).with("/opt/puppetlabs/bin/puppet").returns(false)
+      File.expects(:exist?).with("C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat").returns(true)
+      expect(@agent.default_agent_command).to eq("C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat agent")
+    end
+
     it "should retain old default behaviour" do
       File.stubs(:exist?).returns(false)
       expect(@agent.default_agent_command).to eq("puppet agent")
