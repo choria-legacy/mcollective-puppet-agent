@@ -42,6 +42,14 @@ By default it just works but there are a few settings you can tweak in *server.c
 
 These are the defaults, adjust to taste.
 
+If `plugin.puppet.command` is not set, it will try the following in order
+- Check if `puppet` is findable via the PATH environment variable
+- Use default `puppet-agent` package location if the binary exists
+  - On Windows: `C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat`
+  - Everywhere else: `/opt/puppetlabs/bin/puppet`
+
+> **Warning**: If Puppet is not on the PATH and you are not using the `puppet-agent` package provided by Puppet, this can result in running a binary placed by any user on that system. In that case ensure `plugin.puppet.command` is configured.
+
 The agent allows managing of any resource via the Puppet RAL. By default it refuses to
 manage a resource also managed by Puppet which could create conflicting state. If you
 do wish to allow any resources to be managed set this to true:
