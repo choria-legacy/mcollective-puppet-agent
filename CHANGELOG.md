@@ -2,6 +2,17 @@
 
 Change history for mcollective-puppet
 
+## 1.12.1
+
+Released 2017-02-27
+
+This is a security fix, addressing a privilege escalation that was possible using the
+default locations of AIO paths. Because these weren't confined to a specific platform,
+any user could create a file on Windows that would resolve to the Linux path.
+
+* Only use AIO location for a given platform, and as a fallback if PATH fails (MCOP-585)
+* Consider puppet-agent AIO paths on Windows as well (MCP-584)
+
 ## 1.12.0
 
 Released 2017-01-19
