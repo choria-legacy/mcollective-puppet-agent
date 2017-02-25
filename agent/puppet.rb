@@ -16,32 +16,15 @@ module MCollective
         @puppet_agent = Util::PuppetAgentMgr.manager(configfile, @puppet_service)
       end
 
-      def which(cmd)
-        exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(File::PATH_SEPARATOR) : ['']
-        ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
-          exts.each { |ext|
-            exe = File.join(path, "#{cmd}#{ext}")
-            return exe if File.executable?(exe) && !File.directory?(exe)
-          }
-        end
-        return nil
-      end
-
       # Determines the default command to run for puppet agent
       #
-      # If Puppet is on PATH, prefer that. Otherwise fall back to
-      # default AIO paths depending on platform. If all else fails,
-      # return "puppet agent" anyway and deal with the fallout.
+      # Return the puppet script to execute on the local platform.
       def default_agent_command
-        if which("puppet")
-          "puppet agent"
-        elsif !Util.windows? && File.exist?("/opt/puppetlabs/bin/puppet")
-          "/opt/puppetlabs/bin/puppet agent"
-        elsif Util.windows? && File.exist?("C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat")
-          "C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat agent"
+        if Util.windows?
+          "puppet.bat"
         else
-          "puppet agent"
-        end
+          "puppet"
+        end + " agent"
       end
 
       def run(command, options)
@@ -61,6 +44,12 @@ module MCollective
         else
           # On Unices double fork and exec to run puppet in a disowned child
           child = fork {
+            # If relying on Puppet on PATH, ensure the default AIO path is included.
+            # On Windows, the MSI adds Puppet to the PATH.
+            if command.start_with?("puppet ")
+              ENV["PATH"] += ":/opt/puppetlabs/bin"
+            end
+
             grandchild = fork {
               exec command
             }
