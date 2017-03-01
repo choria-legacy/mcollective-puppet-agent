@@ -41,72 +41,13 @@ describe "puppet agent" do
                                              :agent_file => @agent_file).plugin
     end
 
-    context "on Windows" do
-      before(:each) do
-        MCollective::Util.stubs(:windows?).returns(true)
-        @cache_separator = File.send(:remove_const, "PATH_SEPARATOR")
-        File::PATH_SEPARATOR = ";"
-        ENV.expects(:[]).with("PATHEXT").returns(".bat;.exe").at_least_once
-        ENV.expects(:[]).with("PATH").returns("C:/foo;C:/bar")
-      end
-
-      after(:each) do
-        File.send(:remove_const, "PATH_SEPARATOR")
-        File::PATH_SEPARATOR = @cache_separator
-      end
-
-      it "should default to using PATH if found on PATH" do
-        File.expects(:executable?).with("C:/foo/puppet.bat").returns(true)
-        File.expects(:directory?).with("C:/foo/puppet.bat").returns(false)
-        expect(@agent.default_agent_command).to eq("puppet agent")
-      end
-
-      it "should support AIO" do
-        File.expects(:exist?).with("C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat").returns(true)
-        expect(@agent.default_agent_command).to eq("C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat agent")
-      end
-
-      it "should not use non-Windows paths" do
-        File.expects(:exist?).with("/opt/puppetlabs/bin/puppet").never
-        File.expects(:exist?).with("C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat").returns(false)
-        expect(@agent.default_agent_command).to eq("puppet agent")
-      end
+    it "on Windows it should use puppet.bat" do
+      MCollective::Util.stubs(:windows?).returns(true)
+      expect(@agent.default_agent_command).to eq("puppet.bat agent")
     end
 
-    context "not Windows" do
-      before(:each) do
-        MCollective::Util.stubs(:windows?).returns(false)
-        @cache_separator = File.send(:remove_const, "PATH_SEPARATOR")
-        File::PATH_SEPARATOR = ":"
-        ENV.expects(:[]).with("PATHEXT").returns(nil)
-        ENV.expects(:[]).with("PATH").returns("/foo:/bar")
-      end
-
-      after(:each) do
-        File.send(:remove_const, "PATH_SEPARATOR")
-        File::PATH_SEPARATOR = @cache_separator
-      end
-
-      it "should default to using PATH if found on PATH" do
-        File.expects(:executable?).with("/foo/puppet").returns(true)
-        File.expects(:directory?).with("/foo/puppet").returns(false)
-        expect(@agent.default_agent_command).to eq("puppet agent")
-      end
-
-      it "should support unix AIO" do
-        File.expects(:exist?).with("/opt/puppetlabs/bin/puppet").returns(true)
-        expect(@agent.default_agent_command).to eq("/opt/puppetlabs/bin/puppet agent")
-      end
-
-      it "should not use Windows paths" do
-        File.expects(:exist?).with("C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat").never
-        File.expects(:exist?).with("/opt/puppetlabs/bin/puppet").returns(false)
-        expect(@agent.default_agent_command).to eq("puppet agent")
-      end
-    end
-
-    it "should retain old default behaviour" do
-      File.stubs(:exist?).returns(false)
+    it "on non-Windows it should use puppet" do
+      MCollective::Util.stubs(:windows?).returns(false)
       expect(@agent.default_agent_command).to eq("puppet agent")
     end
   end
