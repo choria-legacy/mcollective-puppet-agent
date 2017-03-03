@@ -67,23 +67,31 @@ module MCollective
         running = find_applying_nodes(host_list)
 
         while !host_list.empty?
-          # Check if we have room in the running bucket
-          if running.size < @concurrency
-            # we have room for another running host
-            host = host_list.pop
+          # clone list so we can safely remove items host_list
+          working_list = host_list.clone
+
+          working_list.each do |host|
+            if running.size >= @concurrency
+              # we do not have room for another running host
+              break
+            end
             # check if host is already in a running state
-            if !running.select{ |running_host| running_host[:name] == host }.empty?
-              # already in a running state, push it back onto the end of the queue
-              Log.debug("#{host} is already being tracked, requeuing")
-              host_list.push(host)
+            Log.debug("Checking #{host}")
+            Log.debug(" -- running: %d, concurrency: %d" % [running.size, @concurrency])
+            if running.find{ |running_host| running_host[:name] == host }
+              # already in a running state, leave it for now
+              Log.debug("#{host} is already being tracked, skipping it")
             else
-              # kick the host, put it in the running bucket
+              # host is not running - kick it, put it in the running bucket
+              Log.debug("Triggering #{host}")
               initiated_at = runhost(host)
               running << make_status(host, initiated_at)
+              host_list.delete(host)
               next
             end
           end
 
+          Log.debug("Sleeping")
           # wait a second to give some time for something to happen
           sleep 1
           # update our view of the network
