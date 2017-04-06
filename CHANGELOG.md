@@ -2,6 +2,13 @@
 
 Change history for mcollective-puppet
 
+## 1.13.0
+
+Released 2017-04-06
+
+* Add support for Puppet 5 (MCOP-587)
+* runhosts no longer block on a single busy node (MCOP-537)
+
 ## 1.12.1
 
 Released 2017-02-27
