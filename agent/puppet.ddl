@@ -3,7 +3,7 @@ metadata :name => "puppet",
          :author => "R.I.Pienaar <rip@devco.net>",
          :license => "ASL2.0",
          :version => "1.13.0",
-         :url => "http://puppetlabs.com",
+         :url => "https://github.com/puppetlabs/mcollective-puppet-agent",
          :timeout => 20
 
 requires :mcollective => "2.2.1"
