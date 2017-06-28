@@ -221,7 +221,7 @@ module MCollective
           raise("Invalid environment '%s' specified" % environment)
         end
 
-        if splaylimit && !splaylimit.is_a?(Fixnum)
+        if splaylimit && !splaylimit.is_a?(Integer)
           raise("Invalid splaylimit '%s' specified" % splaylimit)
         end
 
