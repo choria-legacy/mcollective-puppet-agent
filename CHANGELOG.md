@@ -2,6 +2,12 @@
 
 Change history for mcollective-puppet
 
+## 1.13.1
+
+Released 2017-06-29
+
+* Do not use Fixnum, use Integer instead (MCOP-599)
+
 ## 1.13.0
 
 Released 2017-04-06
