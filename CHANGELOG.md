@@ -2,6 +2,12 @@
 
 Change history for mcollective-puppet
 
+## 1.13.2
+
+Released 2017-08-03
+
+* Declare 'message' as part of status action response (MCOP-601)
+
 ## 1.13.1
 
 Released 2017-06-29
