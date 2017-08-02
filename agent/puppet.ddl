@@ -204,6 +204,10 @@ action "status", :description => "Get the current status of the Puppet agent" do
            :display_as  => "Lock Message",
            :default     => ""
 
+    output :message,
+           :description => "Descriptive message defining the overall agent status",
+           :display_as  => "Message",
+           :default     => "unknown"
 
     summarize do
         aggregate boolean_summary(:enabled, {:true => "enabled", :false => "disabled"})
