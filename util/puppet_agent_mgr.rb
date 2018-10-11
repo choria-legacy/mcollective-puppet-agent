@@ -51,7 +51,7 @@ module MCollective
               when "2"
                 raise "Window is not supported yet" if MCollective::Util.windows?
                 return MgrV2.new(configfile, service_name, testing)
-              when "3", "4", "5"
+              when "3", "4", "5", "6"
                 if MCollective::Util.windows?
                   return MgrWindows.new(configfile, service_name, testing)
                 else
