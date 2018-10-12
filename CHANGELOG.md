@@ -2,6 +2,12 @@
 
 Change history for mcollective-puppet
 
+## 1.14.0
+
+Released 2018-10-11
+
+* Add support for Puppet 6
+
 ## 1.13.2
 
 Released 2017-08-03
